@@ -1,0 +1,34 @@
+﻿Injury classes: ['ACL', 'Ankle', 'Back', 'Groin', 'Hamstring', 'Knee', 'Muscle']
+Young low-risk GK: risk=0.2%  type=None
+
+Veteran high-risk FW: risk=100.0%  type=Muscle
+    Muscle: 19.5%
+    Hamstring: 17.5%
+    Ankle: 16.5%
+
+Peak Midfielder: risk=90.4%  type=Hamstring
+    Hamstring: 17.4%
+    Groin: 16.9%
+    Muscle: 16.6%
+
+Old fatigued FW: risk=100.0%  type=Knee
+    Knee: 22.2%
+    Groin: 16.0%
+    Muscle: 16.0%
+
+Young fit DEF: risk=0.3%  type=None
+
+Mid-risk Defender: risk=99.6%  type=Ankle
+    Ankle: 17.0%
+    Hamstring: 16.2%
+    Muscle: 15.4%
+
+Low load Sub: risk=0.1%  type=None
+
+Very tired MID: risk=100.0%  type=Muscle
+    Muscle: 18.2%
+    Ankle: 18.1%
+    Hamstring: 16.4%
+
+Low risk midfielder: risk=0.6%  type=None
+

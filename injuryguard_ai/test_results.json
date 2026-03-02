@@ -1,0 +1,44 @@
+{
+  "a": {
+    "key_factors": [
+      "Position",
+      "High_Speed_Runs",
+      "Sprint_Load",
+      "Age_Fatigue",
+      "Minutes_Per_Season"
+    ],
+    "predicted_type": "None",
+    "prob_breakdown": {},
+    "recommendations": [
+      "Maintain current training load.",
+      "Ensure optimal hydration."
+    ],
+    "risk_label": "Low",
+    "risk_prob": 1.0
+  },
+  "b": {
+    "key_factors": [
+      "Position",
+      "High_Speed_Runs",
+      "Sprint_Load",
+      "Age_Fatigue",
+      "Minutes_Per_Season"
+    ],
+    "predicted_type": "Hamstring",
+    "prob_breakdown": {
+      "ACL": 28.2,
+      "Ankle": 20.1,
+      "Groin": 8.6,
+      "Hamstring": 33.8,
+      "Shoulder": 9.3
+    },
+    "recommendations": [
+      "Immediate 48h rest period suggested.",
+      "Reduce high-intensity sprint drills.",
+      "Apply load management for next 2 matches.",
+      "Specific proprioception and strengthening focus."
+    ],
+    "risk_label": "High",
+    "risk_prob": 99.0
+  }
+}
