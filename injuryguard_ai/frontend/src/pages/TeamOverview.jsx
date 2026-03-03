@@ -23,7 +23,17 @@ import {
     UserX,
     Activity,
     Zap,
-    Dumbbell
+    Dumbbell,
+    Apple,
+    RefreshCw,
+    ShieldAlert,
+    ArrowUpRight,
+    ArrowRight,
+    Search,
+    Filter,
+    LayoutGrid,
+    LayoutList,
+    Shield
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -35,6 +45,8 @@ const TeamOverview = () => {
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState(null);
     const [registeredPlayers, setRegisteredPlayers] = useState([]);
+    const [viewMode, setViewMode] = useState('grid');
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         api.get('/players')
@@ -68,320 +80,415 @@ const TeamOverview = () => {
         }
     };
 
+    const filteredPlayers = registeredPlayers.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const pieData = results ? [
-        { name: 'Low', value: results.risk_distribution.Low, color: '#00f2ff' },
-        { name: 'Medium', value: results.risk_distribution.Medium, color: '#fbbf24' },
+        { name: 'Low', value: results.risk_distribution.Low, color: '#FF5F01' },
+        { name: 'Medium', value: results.risk_distribution.Medium, color: '#FFC107' },
         { name: 'High', value: results.risk_distribution.High, color: '#ef4444' },
     ] : [];
 
     return (
-        <div className="space-y-12 pb-16 font-['Outfit']">
+        <div className="space-y-16 pb-24 font-['Outfit']">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                <div className="flex items-center gap-6">
-                    <div className="h-16 w-16 bg-electric-cyan/20 rounded-2xl flex items-center justify-center border border-electric-cyan/30 shadow-[0_0_20px_rgba(0,242,255,0.2)]">
-                        <Users className="text-electric-cyan h-8 w-8" />
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+                <div className="flex items-center gap-8">
+                    <div className="h-20 w-20 bg-primary/10 rounded-[2.5rem] flex items-center justify-center border border-primary/20 shadow-3xl shadow-primary/5">
+                        <Users className="text-primary h-10 w-10" />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">Squad <span className="text-electric-cyan cyan-glow">Intelligence</span></h1>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] leading-none mt-1">Regional Performance Control Hub</p>
+                        <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic">Squad <span className="text-primary italic">Intelligence</span></h1>
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-2 opacity-60">Fleet Performance Hub // {currentUser?.team_name || 'Global'}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="flex flex-col items-end">
-                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">Squad Assignment</p>
-                        <div className="bg-electric-cyan px-4 py-2 rounded-xl text-deep-black font-black text-sm tracking-tight shadow-[0_0_15px_rgba(0,242,255,0.3)] border border-electric-cyan/50 uppercase italic">
-                            {currentUser?.team_name || '---'}
+
+                <div className="flex items-center gap-4">
+                    <div className="relative group">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-700 group-focus-within:text-primary transition-colors" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Filter Units..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-[#0a0a0a] border border-white/5 rounded-[1.5rem] py-4 pl-14 pr-6 text-zinc-300 font-bold text-xs outline-none focus:border-primary/30 w-[250px] transition-all"
+                        />
+                    </div>
+                    <button className="h-14 w-14 bg-[#0a0a0a] border border-white/5 rounded-[1.5rem] flex items-center justify-center text-zinc-600 hover:text-white transition-all">
+                        <Filter size={18} />
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="h-14 bg-[#0a0a0a] border border-white/5 rounded-[1.5rem] flex p-1 gap-1">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`h-full px-4 rounded-2xl flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-zinc-800 text-white shadow-xl' : 'text-zinc-600 hover:text-zinc-400'}`}
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`h-full px-4 rounded-2xl flex items-center justify-center transition-all ${viewMode === 'list' ? 'bg-zinc-800 text-white shadow-xl' : 'text-zinc-600 hover:text-zinc-400'}`}
+                        >
+                            <LayoutList size={16} />
+                        </button>
+                    </div>
+
+                    <div className="hidden xl:flex flex-col items-end gap-3 translate-y-[-10px]">
+                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] italic mb-1">Squad Assignment</p>
+                        <div className="h-16 w-16 bg-[#00e6ff] rounded-2xl flex items-center justify-center text-black shadow-[0_0_30px_#00e6ff44]">
+                            <div className="flex gap-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Registered Squad Section (Shown if no CSV results) */}
-            {!results && registeredPlayers.length > 0 && (
-                <div className="space-y-6">
-                    <h2 className="text-xl font-black text-white uppercase tracking-widest italic flex items-center gap-3">
-                        <Users className="text-electric-cyan" size={20} />
-                        Active Squad <span className="text-slate-600">({registeredPlayers.length})</span>
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {registeredPlayers.map((player, idx) => (
+            {/* Main Content Area */}
+            <AnimatePresence mode="wait">
+                {loading ? (
+                    <motion.div
+                        key="loading"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="h-[500px] flex flex-col items-center justify-center text-center gap-10"
+                    >
+                        <div className="relative w-24 h-24">
                             <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="glass-card p-6 border-l-2 border-l-electric-cyan group hover:bg-white/[0.03] transition-all"
-                            >
-                                <div
-                                    className="cursor-pointer group/header"
-                                    onClick={() => {
-                                        if (player.latest_assessment) {
-                                            navigate('/dashboard', {
-                                                state: {
-                                                    prediction: { ...player.latest_assessment.result, player_name: player.name },
-                                                    input: player.latest_assessment.input,
-                                                    player: player
-                                                }
-                                            });
-                                        } else {
-                                            navigate('/assessment', { state: { player } });
-                                        }
-                                    }}
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="h-12 w-12 bg-slate-800 rounded-xl flex items-center justify-center font-black text-electric-cyan border border-white/5 transition-all group-hover/header:border-electric-cyan/50 group-hover/header:shadow-[0_0_15px_rgba(0,242,255,0.2)]">
-                                            {player.name?.[0]?.toUpperCase() || 'P'}
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Status</p>
-                                            <p className={`text-[10px] font-black uppercase mt-1 ${player.latest_assessment ? 'text-emerald-400' : 'text-slate-600'}`}>
-                                                {player.latest_assessment ? 'SCANNED' : 'PENDING'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-black text-white uppercase tracking-tight group-hover/header:text-electric-cyan transition-colors">{player.name}</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold mb-4">{player.email}</p>
-
-                                    {player.profile && (
-                                        <div className="flex gap-3 mb-6">
-                                            <span className="bg-white/5 px-2 py-1 rounded text-[8px] font-black text-slate-400 border border-white/5 uppercase">{player.profile.position}</span>
-                                            <span className="bg-white/5 px-2 py-1 rounded text-[8px] font-black text-slate-400 border border-white/5 uppercase">AGE_{player.profile.age}</span>
-                                            <span className="bg-white/5 px-2 py-1 rounded text-[8px] font-black text-slate-400 border border-white/5 uppercase">{player.profile.league}</span>
-                                        </div>
-                                    )}
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 border-4 border-primary/20 border-t-primary rounded-full shadow-[0_0_30px_#FF5F0133]"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Activity className="text-primary h-10 w-10 animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <h3 className="text-2xl font-black text-white uppercase tracking-widest italic">Synchronizing Neural Data...</h3>
+                            <p className="text-zinc-600 text-[10px] uppercase font-black tracking-[0.6em] opacity-60">Mapping Biometric Identifiers to Squad Context</p>
+                        </div>
+                    </motion.div>
+                ) : results ? (
+                    <motion.div
+                        key="results"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-1 lg:grid-cols-12 gap-10"
+                    >
+                        {/* Summary Metrics */}
+                        <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-10">
+                            <div className="glass-card p-10 relative overflow-hidden group shadow-3xl">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform">
+                                    <TrendingUp size={100} />
                                 </div>
+                                <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Fleet Mean Stress</h4>
+                                <div className="flex items-end gap-5">
+                                    <h2 className="text-6xl font-black text-primary italic tracking-tighter">{results.avg_risk}%</h2>
+                                    <TrendingUp className="text-primary/40 mb-3" size={32} />
+                                </div>
+                                <div className="mt-8 flex items-center gap-3">
+                                    <div className="h-1 w-1 rounded-full bg-primary animate-pulse shadow-primary" />
+                                    <p className="text-[9px] text-zinc-700 uppercase font-black tracking-widest leading-none">SYSTEM.DELTA: +2.1% (30D HISTORY)</p>
+                                </div>
+                            </div>
 
-                                {player.latest_assessment ? (
-                                    <div className="border-t border-white/5 pt-4">
-                                        <div
-                                            onClick={() => navigate('/dashboard', {
-                                                state: {
-                                                    prediction: { ...player.latest_assessment.result, player_name: player.name },
-                                                    input: player.latest_assessment.input,
-                                                    player: player
-                                                }
-                                            })}
-                                            className="flex justify-between items-center mb-4 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors group/stats"
-                                        >
-                                            <div>
-                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Current Risk</p>
-                                                <p className={`text-xl font-black italic ${player.latest_assessment.result.risk_label === 'High' ? 'text-red-500' : 'text-electric-cyan'} group-hover/stats:scale-110 transition-transform origin-left`}>
-                                                    {player.latest_assessment.result.risk_prob}%
-                                                </p>
+                            <div className="glass-card p-10 relative overflow-hidden group shadow-3xl border-t-red-500/20">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+                                    <AlertTriangle size={100} />
+                                </div>
+                                <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Critical Anomaly Units</h4>
+                                <div className="flex items-end gap-5">
+                                    <h2 className="text-6xl font-black text-red-500 italic tracking-tighter">{results.risk_distribution.High}</h2>
+                                    <ShieldAlert className="text-red-500/40 mb-3 animate-pulse" size={32} />
+                                </div>
+                                <div className="mt-8">
+                                    <span className="text-[9px] text-red-500/60 uppercase font-black tracking-widest bg-red-500/5 py-2 px-4 rounded-xl border border-red-500/10 inline-block">
+                                        ACTIONABLE THRESHOLD EXCEEDED
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="glass-card p-10 relative overflow-hidden group shadow-3xl">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:-rotate-6 transition-transform">
+                                    <CheckCircle2 size={100} />
+                                </div>
+                                <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Overall Squad Health</h4>
+                                <div className="flex items-end gap-5">
+                                    <h2 className="text-6xl font-black text-emerald-500 italic tracking-tighter">89.4%</h2>
+                                    <Shield className="text-emerald-500/40 mb-3" size={32} />
+                                </div>
+                                <div className="mt-8">
+                                    <p className="text-[9px] text-zinc-700 uppercase font-black tracking-widest">CURRENT OPERATIONAL CAPACITY</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Distribution Chart */}
+                        <div className="lg:col-span-12 glass-card p-12 shadow-3xl relative overflow-hidden">
+                            <h3 className="text-xl font-black text-white uppercase mb-12 tracking-tighter italic flex items-center gap-5">
+                                <Activity className="text-primary" size={24} />
+                                Stress Stratification Analysis
+                            </h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                                <div className="h-[350px] w-full relative">
+                                    <ResponsiveContainer>
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                dataKey="value"
+                                                nameKey="name"
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={90}
+                                                outerRadius={140}
+                                                paddingAngle={10}
+                                                stroke="none"
+                                            >
+                                                {pieData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                                            </Pie>
+                                            <Tooltip
+                                                contentStyle={{ background: '#0a0a0a', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', color: '#fff', fontWeight: 900, textTransform: 'uppercase', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">SQUAD TOTAL</p>
+                                        <p className="text-4xl font-black text-white italic">{results.total_players}</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-8">
+                                    {pieData.map(d => (
+                                        <div key={d.name} className="flex items-center justify-between p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-white/10 transition-all">
+                                            <div className="flex items-center gap-5">
+                                                <div className="h-4 w-4 rounded-full shadow-lg" style={{ background: d.color, boxShadow: `0 0 15px ${d.color}44` }} />
+                                                <span className="text-xl font-black text-white uppercase italic tracking-tighter">{d.name} Alert Area</span>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Primary Site</p>
-                                                <p className="text-[10px] font-black text-white uppercase group-hover/stats:text-electric-cyan transition-colors">{player.latest_assessment.result.predicted_type}</p>
+                                                <span className="text-2xl font-black text-zinc-400 italic">{d.value}</span>
+                                                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1">PERCENTILE: {Math.round((d.value / results.total_players) * 100)}%</p>
                                             </div>
                                         </div>
+                                    ))}
+                                    <button
+                                        onClick={() => setResults(null)}
+                                        className="btn-outline w-full py-5 text-[10px]"
+                                    >
+                                        Clear Intelligence Forecast
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
-                                        <div className="flex gap-2 mt-4">
-                                            <button
-                                                onClick={() => {
-                                                    const topInjury = player.latest_assessment.result.predicted_type || 'general';
-                                                    navigate('/diet', { state: { injury_type: topInjury } });
-                                                }}
-                                                className="flex-1 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-deep-black py-2 rounded-lg border border-emerald-500/20 text-[8px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1"
-                                            >
-                                                <Zap size={10} /> DIET
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    const topInjury = player.latest_assessment.result.predicted_type || 'general';
-                                                    navigate('/workout', { state: { injury_type: topInjury } });
-                                                }}
-                                                className="flex-1 bg-orange-500/10 hover:bg-orange-500 text-orange-400 hover:text-deep-black py-2 rounded-lg border border-orange-500/20 text-[8px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1"
-                                            >
-                                                <Dumbbell size={10} /> WORKOUT
-                                            </button>
+                        {/* High Risk Units List */}
+                        <div className="lg:col-span-12 space-y-8">
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-5 italic">
+                                <UserX size={24} className="text-red-500" />
+                                High Variance Personnel
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {results.top_risk_players.map((p, i) => (
+                                    <div key={i} className="glass-card p-10 relative overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-3xl">
+                                        <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform text-red-500">
+                                            <ShieldAlert size={60} />
                                         </div>
-
-                                        <div className="grid grid-cols-2 gap-2 mt-2">
-                                            <button
-                                                onClick={() => navigate('/dashboard', {
-                                                    state: {
-                                                        prediction: { ...player.latest_assessment.result, player_name: player.name },
-                                                        input: player.latest_assessment.input,
-                                                        player: player
-                                                    }
-                                                })}
-                                                className="bg-electric-cyan/10 hover:bg-electric-cyan text-electric-cyan hover:text-deep-black py-3 rounded-xl border border-electric-cyan/20 hover:border-electric-cyan text-[10px] font-black uppercase tracking-widest transition-all"
-                                            >
-                                                VIEW DIAGNOSTICS
-                                            </button>
-                                            <button
-                                                onClick={() => navigate('/assessment', { state: { player } })}
-                                                className="bg-white/5 hover:bg-white/10 text-slate-400 py-3 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
-                                            >
-                                                RE-SCAN
-                                            </button>
+                                        <div className="flex justify-between items-start mb-10">
+                                            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-600/20 to-black flex items-center justify-center text-red-500 font-black text-xs border border-red-500/20 shadow-xl">
+                                                U-{i + 1}
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-2xl font-black text-red-500 italic leading-none">{Math.round((1 - (p.Injury_Risk === 0 ? 0.3 : 0.7)) * 100)}%</p>
+                                                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1">STRESS</p>
+                                            </div>
+                                        </div>
+                                        <h4 className="text-xl font-black text-white uppercase tracking-tighter italic mb-4 group-hover:text-red-400 transition-colors leading-tight">{p.PlayerName || 'Elite Unit Delta'}</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="bg-white/5 border border-white/5 px-2 py-1 rounded-md text-[8px] font-black text-zinc-500 uppercase">{p.Position}</span>
+                                            <span className="bg-white/5 border border-white/5 px-2 py-1 rounded-md text-[8px] font-black text-zinc-500 uppercase">AGE_{p.Age}</span>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="border-t border-white/5 pt-4">
-                                        <p className="text-[9px] font-black text-slate-600 uppercase italic mb-4">Awaiting first diagnostic scan...</p>
-                                        <button
-                                            onClick={() => navigate('/assessment', { state: { player } })}
-                                            className="w-full bg-white/5 hover:bg-white/10 text-slate-400 py-3 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="squad"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-12"
+                    >
+                        {/* Empty/Roster State */}
+                        {filteredPlayers.length === 0 ? (
+                            <div className="glass-card min-h-[500px] flex flex-col items-center justify-center text-center p-20 border-zinc-900 border-dashed shadow-3xl">
+                                <div className="h-40 w-40 bg-zinc-900 rounded-[3rem] flex items-center justify-center border border-dashed border-zinc-800 mb-10 group relative">
+                                    <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <Users className="text-zinc-800 h-20 w-20 relative z-10" />
+                                </div>
+                                <h3 className="text-3xl font-black text-white uppercase mb-4 tracking-tighter italic">Squad Database <span className="text-primary">Stalled</span></h3>
+                                <p className="text-zinc-600 max-w-sm font-bold text-lg leading-relaxed mb-12">No registered athletes found. Inject a roster database or await unit activation.</p>
+
+                                <div className="flex gap-4">
+                                    <label className="btn-premium px-12 group cursor-pointer inline-flex items-center gap-3">
+                                        <Upload className="group-hover:-translate-y-1 transition-transform" />
+                                        Inject Roster CSV
+                                        <input type="file" className="hidden" accept=".csv" onChange={handleFileChange} />
+                                    </label>
+                                    <button className="btn-outline px-10">Manual Entry</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-12">
+                                <div className="flex items-center gap-4">
+                                    <Users className="text-primary" size={20} />
+                                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Active Squad <span className="text-zinc-600 font-mono text-xl">({filteredPlayers.length})</span></h2>
+                                </div>
+                                <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10" : "space-y-6"}>
+                                    {filteredPlayers.map((player, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            className={`glass-card relative overflow-hidden group hover:border-primary/40 transition-all duration-700 shadow-3xl ${viewMode === 'list' ? 'p-6 flex items-center justify-between' : 'p-10'}`}
                                         >
-                                            RUN NEW ASSESSMENT
-                                        </button>
-                                    </div>
-                                )}
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            )}
+                                            {/* Grid View Content */}
+                                            {viewMode === 'grid' ? (
+                                                <>
+                                                    <div className="flex justify-between items-start mb-10">
+                                                        <div className="h-16 w-16 bg-zinc-900 rounded-[1.8rem] flex items-center justify-center font-black text-primary text-2xl border border-white/5 transition-all group-hover:border-primary/30 group-hover:shadow-[0_0_20px_#FF5F0122]">
+                                                            {player.name?.[0]?.toUpperCase() || 'P'}
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest leading-none mb-2">Status</p>
+                                                            <div className={`px-3 py-1.5 rounded-xl border text-[9px] font-black tracking-widest uppercase ${player.latest_assessment ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-zinc-900 border-white/5 text-zinc-600'}`}>
+                                                                {player.latest_assessment ? 'Scanned' : 'Pending'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-            {!results && !loading && registeredPlayers.length === 0 && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="glass-card min-h-[500px] flex flex-col items-center justify-center text-center p-20 border-dashed border-electric-cyan/20 shadow-2xl"
-                >
-                    <div className="h-40 w-40 bg-electric-cyan/5 rounded-[3rem] flex items-center justify-center border border-dashed border-electric-cyan/20 mb-10 relative">
-                        <div className="absolute inset-0 bg-electric-cyan/5 blur-3xl animate-pulse" />
-                        <Users className="text-electric-cyan/20 h-20 w-20 relative z-10" />
-                    </div>
-                    <h3 className="text-3xl font-black text-white uppercase mb-4 tracking-tighter italic">Squad Database <span className="text-electric-cyan">Empty</span></h3>
-                    <p className="text-slate-500 max-w-md font-medium text-lg leading-relaxed">No registered athletes found. Use the 'Inject Roster' tool to upload local data or wait for players to activate their stations.</p>
-                </motion.div>
-            )}
+                                                    <div className="space-y-2 mb-10">
+                                                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic group-hover:text-primary transition-all duration-500">{player.name}</h3>
+                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em]">{player.email}</p>
+                                                    </div>
 
-            {loading && (
-                <div className="h-[500px] flex flex-col items-center justify-center text-center gap-8">
-                    <div className="relative w-24 h-24">
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 border-4 border-electric-cyan/20 border-t-electric-cyan rounded-full"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Activity className="text-electric-cyan h-10 w-10 animate-pulse" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <h3 className="text-2xl font-black text-white uppercase tracking-widest animate-pulse italic">Scanning Roster Database...</h3>
-                        <p className="text-slate-500 text-[10px] uppercase font-black tracking-[0.5em]">Processing Biometric Identifiers</p>
-                    </div>
-                </div>
-            )}
+                                                    {player.profile && (
+                                                        <div className="flex flex-wrap gap-3 mb-12">
+                                                            <span className="bg-white/[0.03] px-3 py-1.5 rounded-xl text-[9px] font-black text-zinc-500 border border-white/5 uppercase tracking-widest">{player.profile.position}</span>
+                                                            <span className="bg-white/[0.03] px-3 py-1.5 rounded-xl text-[9px] font-black text-zinc-500 border border-white/5 uppercase tracking-widest">AGE_{player.profile.age}</span>
+                                                        </div>
+                                                    )}
 
-            {results && !loading && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                                    {player.latest_assessment ? (
+                                                        <>
+                                                            <div className="grid grid-cols-2 gap-10 mb-8 border-t border-white/5 pt-8">
+                                                                <div>
+                                                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2">Current Risk</p>
+                                                                    <p className="text-3xl font-black text-red-500 italic tracking-tighter">{player.latest_assessment.result.risk_prob}%</p>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2">Primary Site</p>
+                                                                    <p className="text-xl font-black text-white uppercase tracking-tighter italic">{player.latest_assessment.result.predicted_type || 'None'}</p>
+                                                                </div>
+                                                            </div>
 
-                    {/* Main Key Metrics */}
-                    <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-card p-10 border-t-2 border-t-electric-cyan relative overflow-hidden group shadow-2xl">
-                            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:rotate-12 transition-transform">
-                                <TrendingUp size={80} />
-                            </div>
-                            <p className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-[0.3em]">Squad Average Risk</p>
-                            <div className="flex items-end gap-4">
-                                <h2 className="text-6xl font-black text-electric-cyan italic tracking-tighter cyan-glow">{results.avg_risk}%</h2>
-                                <TrendingUp className="text-electric-cyan/50 mb-2" size={32} />
-                            </div>
-                            <p className="text-[8px] text-slate-600 mt-6 uppercase font-black tracking-widest flex items-center gap-2">
-                                <div className="h-1 w-1 rounded-full bg-electric-cyan animate-pulse" />
-                                PERFORMANCE DELTA: +2.1% (30D)
-                            </p>
-                        </motion.div>
-
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-10 border-t-2 border-t-red-500 relative overflow-hidden group shadow-2xl">
-                            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
-                                <AlertTriangle size={80} />
-                            </div>
-                            <p className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-[0.3em]">Hyper-Critical Units</p>
-                            <div className="flex items-end gap-4">
-                                <h2 className="text-6xl font-black text-red-500 italic tracking-tighter shadow-red-500/20">{results.risk_distribution.High}</h2>
-                                <AlertTriangle className="text-red-500/50 mb-2 animate-bounce" size={32} />
-                            </div>
-                            <p className="text-[8px] text-red-500/70 mt-6 uppercase font-black tracking-widest bg-red-500/5 py-1 px-3 rounded-full inline-block">
-                                IMMEDIATE ACTION REQUIRED
-                            </p>
-                        </motion.div>
-
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card p-10 border-t-2 border-t-emerald-500 relative overflow-hidden group shadow-2xl">
-                            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:-rotate-6 transition-transform">
-                                <CheckCircle2 size={80} />
-                            </div>
-                            <p className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-[0.3em]">Squad Readiness</p>
-                            <div className="flex items-end gap-4">
-                                <h2 className="text-6xl font-black text-emerald-500 italic tracking-tighter">89.4%</h2>
-                                <CheckCircle2 className="text-emerald-500/50 mb-2" size={32} />
-                            </div>
-                            <p className="text-[8px] text-slate-600 mt-6 uppercase font-black tracking-widest">CURRENT OPERATIONAL CAPACITY</p>
-                        </motion.div>
-                    </div>
-
-                    {/* Charts Row */}
-                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-5 glass-card p-10 flex flex-col items-center justify-center shadow-2xl overflow-hidden relative">
-                        <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-electric-cyan/20 to-transparent" />
-                        <h3 className="text-xl font-black text-white uppercase self-start mb-12 tracking-tighter italic flex items-center gap-3">
-                            <Activity className="text-electric-cyan" size={20} />
-                            Risk Stratification
-                        </h3>
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer>
-                                <PieChart>
-                                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={8}>
-                                        {pieData.map((entry, index) => <Cell key={index} fill={entry.color} stroke="none" />)}
-                                    </Pie>
-                                    <Tooltip contentStyle={{ background: '#020617', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontWeight: 900, textTransform: 'uppercase' }} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="flex flex-wrap gap-6 justify-center mt-6">
-                            {pieData.map(d => (
-                                <div key={d.name} className="flex items-center gap-3 bg-white/[0.02] py-2 px-4 rounded-xl border border-white/5">
-                                    <div className="h-2 w-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ background: d.color, color: d.color }} />
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{d.name}: {d.value}</span>
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                <button
+                                                                    onClick={() => navigate('/diet', { state: { player, injury_type: player.latest_assessment.result.predicted_type } })}
+                                                                    className="flex items-center justify-center gap-2 py-4 bg-[#00f5ab]/10 hover:bg-[#00f5ab]/20 border border-[#00f5ab]/20 rounded-2xl text-[#00f5ab] text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-[#00f5ab]/5"
+                                                                >
+                                                                    <Apple size={14} /> DIET
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => navigate('/workout', { state: { player, injury_type: player.latest_assessment.result.predicted_type } })}
+                                                                    className="flex items-center justify-center gap-2 py-4 bg-[#ff5f01]/10 hover:bg-[#ff5f01]/20 border border-[#ff5f01]/20 rounded-2xl text-[#ff5f01] text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-[#ff5f01]/5"
+                                                                >
+                                                                    <Dumbbell size={14} /> WORKOUT
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => navigate('/dashboard', { state: { prediction: player.latest_assessment.result, input: player.latest_assessment.input, player } })}
+                                                                    className="flex items-center justify-center py-4 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-2xl text-cyan-400 text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-cyan-500/5"
+                                                                >
+                                                                    View Diagnostics
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => navigate('/assessment', { state: { player } })}
+                                                                    className="flex items-center justify-center py-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-zinc-500 text-[10px] font-black uppercase tracking-widest transition-all"
+                                                                >
+                                                                    Re-scan
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="pt-8 border-t border-white/5">
+                                                            <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] mb-6 italic">Awaiting first diagnostic scan...</p>
+                                                            <button
+                                                                onClick={() => navigate('/assessment', { state: { player } })}
+                                                                className="w-full py-5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-2xl"
+                                                            >
+                                                                Run New Assessment
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                /* List View Content */
+                                                <>
+                                                    <div className="flex items-center gap-6 flex-1">
+                                                        <div className="h-12 w-12 bg-zinc-900 rounded-2xl flex items-center justify-center font-black text-primary border border-white/5">
+                                                            {player.name?.[0]?.toUpperCase() || 'P'}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-lg font-black text-white uppercase italic tracking-tighter">{player.name}</h3>
+                                                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{player.email}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-12 flex-1">
+                                                        <div className="flex gap-4">
+                                                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">{player.profile?.position || 'N/A'}</span>
+                                                            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">AGE_{player.profile?.age || '??'}</span>
+                                                        </div>
+                                                        <div className={`px-4 py-2 rounded-2xl border text-[10px] font-black tracking-widest uppercase ${player.latest_assessment ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-zinc-900 border-white/5 text-zinc-700'}`}>
+                                                            {player.latest_assessment ? 'ACTIVE Intel' : 'SCAN PENDING'}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => navigate(player.latest_assessment ? '/dashboard' : '/assessment', { state: { player, prediction: player.latest_assessment?.result, input: player.latest_assessment?.input } })}
+                                                        className="h-12 w-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-600 hover:text-primary transition-all hover:bg-primary/10 hover:border-primary/20"
+                                                    >
+                                                        <ArrowUpRight size={18} />
+                                                    </button>
+                                                </>
+                                            )}
+                                        </motion.div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        )}
                     </motion.div>
+                )}
+            </AnimatePresence>
 
-                    {/* Top Risk Players */}
-                    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="lg:col-span-7 glass-card p-10 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-red-500/20 to-transparent" />
-                        <h3 className="text-xl font-black text-white uppercase mb-12 tracking-tighter flex items-center gap-4 italic">
-                            <UserX size={24} className="text-red-500" />
-                            Personnel Under Watch
-                        </h3>
-                        <div className="space-y-5">
-                            {results.top_risk_players.map((p, i) => (
-                                <div key={i} className="flex items-center justify-between p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-red-500/30 transition-all duration-300 group hover:-translate-y-1">
-                                    <div className="flex items-center gap-6">
-                                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-red-600/20 to-deep-black flex items-center justify-center text-red-500 font-black text-sm border border-red-500/20 tracking-tighter">
-                                            ID-{i + 1}
-                                        </div>
-                                        <div>
-                                            <p className="text-lg font-black text-white uppercase tracking-tight group-hover:text-red-400 transition-colors italic">{p.PlayerName || 'Elite Unit Delta'}</p>
-                                            <div className="flex items-center gap-3 text-[9px] text-slate-500 font-black uppercase mt-2 tracking-widest">
-                                                <span className="text-slate-400">{p.Position}</span>
-                                                <div className="h-1 w-1 rounded-full bg-slate-800" />
-                                                <span className="text-slate-400">{p.League}</span>
-                                                <div className="h-1 w-1 rounded-full bg-slate-800" />
-                                                <span className="text-slate-400">AGE_{p.Age}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-3xl font-black text-red-500 italic tracking-tighter">{Math.round((1 - (p.Injury_Risk === 0 ? 0.3 : 0.7)) * 100)}%</p>
-                                        <p className="text-[8px] font-black text-slate-600 uppercase tracking-[.3em] mt-1">Stress Index</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </motion.div>
-
-                </div>
-            )}
-        </div>
+            {/* Float Action for Roster Upload */}
+            {
+                !results && registeredPlayers.length > 0 && (
+                    <div className="fixed bottom-12 right-12 z-50">
+                        <label className="h-20 px-10 bg-primary text-black rounded-[2.5rem] shadow-[0_30px_60px_#FF5F0144] flex items-center gap-4 cursor-pointer hover:scale-105 transition-transform active:scale-95 duration-500 font-black uppercase text-xs tracking-widest italic group">
+                            <Upload className="group-hover:-translate-y-1 transition-transform" />
+                            Inject Roster Delta
+                            <input type="file" className="hidden" accept=".csv" onChange={handleFileChange} />
+                        </label>
+                    </div>
+                )
+            }
+        </div >
     );
-
 };
 
 export default TeamOverview;

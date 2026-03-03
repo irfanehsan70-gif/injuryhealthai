@@ -23,58 +23,59 @@ import urllib.parse
 # ─────────────────────────────────────────────
 # MongoDB Connection
 # ─────────────────────────────────────────────
+# Using the standard SRV connection string with confirmed password
+import urllib.parse
 USER = "Irfan"
 PWD = "Fanu916@"
 MONGO_URI = f"mongodb+srv://{USER}:{urllib.parse.quote_plus(PWD)}@cluster0.osljpls.mongodb.net/?appName=Cluster0"
 DB_NAME = "injuryguard_ai"
 
 try:
-    # Use tlsAllowInvalidCertificates and explicitly set connectTimeout
+    print(f"📡 Connecting to MongoDB Atlas at {MONGO_URI.split('@')[-1]}...")
     client = MongoClient(MONGO_URI, 
                          serverSelectionTimeoutMS=10000, 
                          connectTimeoutMS=10000,
-                         tlsAllowInvalidCertificates=True)
-    client.admin.command('ping')  # Verify connection
+                         tlsAllowInvalidCertificates=True,
+                         tlsCAFile=ca)
+    client.admin.command('ping')
     db = client[DB_NAME]
     users_col = db["users"]
     predictions_col = db["predictions"]
     team_uploads_col = db["team_uploads"]
     players_col = db["players"]
-    print("✅ MongoDB connected successfully.")
+    print(f"✅ Core Connection Established. Using database: {DB_NAME}")
 
-    # Seed default users if not exists
-    if not users_col.find_one({"email": "admin@injuryguard.ai"}):
-        hashed = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt())
-        users_col.insert_one({
-            "name": "Elite Coach",
-            "email": "admin@injuryguard.ai",
-            "password": hashed,
-            "role": "admin",
-            "team_name": "GLOBAL",
-            "created_at": datetime.datetime.utcnow()
-        })
-        print("✅ Default admin user seeded.")
-    
-    if not users_col.find_one({"email": "player@injuryguard.ai"}):
-        hashed = bcrypt.hashpw("player123".encode('utf-8'), bcrypt.gensalt())
-        users_col.insert_one({
-            "name": "Pro Athlete",
-            "email": "player@injuryguard.ai",
-            "password": hashed,
-            "role": "player",
-            "team_name": "GLOBAL",
-            "created_at": datetime.datetime.utcnow()
-        })
-        print("✅ Default player user seeded.")
+    # Seed default users - separate try to not crash the whole DB link
+    try:
+        print("🌱 Seeding default users...")
+        if not users_col.find_one({"email": "admin@injuryguard.ai"}):
+            hashed = bcrypt.hashpw("admin123".encode('utf-8'), bcrypt.gensalt())
+            users_col.insert_one({
+                "name": "Elite Coach", "email": "admin@injuryguard.ai", "password": hashed,
+                "role": "admin", "team_name": "GLOBAL", "created_at": datetime.datetime.utcnow()
+            })
+            print("✅ Default admin user seeded.")
+        
+        if not users_col.find_one({"email": "player@injuryguard.ai"}):
+            hashed = bcrypt.hashpw("player123".encode('utf-8'), bcrypt.gensalt())
+            users_col.insert_one({
+                "name": "Pro Athlete", "email": "player@injuryguard.ai", "password": hashed,
+                "role": "player", "team_name": "GLOBAL", "created_at": datetime.datetime.utcnow()
+            })
+            print("✅ Default player user seeded.")
+    except Exception as seed_err:
+        print(f"⚠️  Seeding failed (optional): {seed_err}")
+
+    print("✅ MongoDB initialization complete.")
+
 except Exception as e:
-    print(f"⚠️  MongoDB connection failed: {e}. Falling back to demo mode.")
+    print(f"❌ CRITICAL: MongoDB connection failed: {e}")
+    print("⚠️  Application falling back to demo mode (Local State Only).")
     db = None
     users_col = None
     predictions_col = None
     team_uploads_col = None
     players_col = None
-else:
-    pass
 
 # ─────────────────────────────────────────────
 # ML Models (Two-Stage Pipeline)
@@ -137,6 +138,12 @@ def standardize_input(data):
     }
     return {mapping.get(k, k): v for k, v in data.items()}
 
+@app.before_request
+def log_request_info():
+    print(f"📥 {request.method} {request.path}")
+    if request.method == 'POST':
+        print(f"📦 Body: {request.get_data()[:100]}...")
+
 # ─────────────────────────────────────────────
 # Auth Decorator
 # ─────────────────────────────────────────────
@@ -151,6 +158,7 @@ def token_required(f):
                 token = token.split(' ')[1]
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             request.current_user = data
+            print(f"👤 User: {data.get('user')} ({data.get('role')})")
         except Exception:
             return jsonify({'message': 'Token is invalid or expired!'}), 401
         return f(*args, **kwargs)
@@ -290,6 +298,23 @@ def get_me():
         user = users_col.find_one({"email": email}, {"password": 0})
         return jsonify(serialize_doc(user))
     return jsonify({'email': email, 'name': request.current_user.get('name', 'Coach')})
+
+
+@app.route('/api/player/assessments', methods=['GET'])
+@token_required
+def get_player_assessments():
+    """Flat history of assessments for the dashboard."""
+    if predictions_col is None:
+        return jsonify([])
+    email = request.current_user.get('user')
+    docs = list(predictions_col.find({"user": email}).sort("timestamp", -1).limit(50))
+    history = []
+    for d in docs:
+        item = serialize_doc(d)
+        if 'result' in item:
+            item.update(item.pop('result'))
+        history.append(item)
+    return jsonify(history)
 
 
 @app.route('/api/player_profile', methods=['GET'])
@@ -477,13 +502,14 @@ def predict():
             'predicted_type': predicted_type,
             'prob_breakdown': prob_breakdown,
             'key_factors':   top_factors,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'timestamp': datetime.datetime.utcnow().isoformat()
         }
 
         # ── Persist to MongoDB ────────────────────────────────────
         if predictions_col is not None:
             prediction_entry = {
-                "user":      standard_data.get('PlayerEmail', request.current_user.get('user')),
+                "user":      standard_data.get('PlayerEmail') or request.current_user.get('user'),
                 "player_name": result['player_name'],
                 "input":     {k: (int(v) if hasattr(v, 'item') else v)
                               for k, v in standard_data.items()},

@@ -29,17 +29,17 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '40px', color: '#fff', background: '#0a0b1e', minHeight: '100vh', fontFamily: 'monospace' }}>
-          <h1 style={{ color: '#ef4444', fontSize: '24px', marginBottom: '16px' }}>⚠ Runtime Error</h1>
-          <p style={{ color: '#94a3b8', marginBottom: '16px' }}>The app crashed. Check the browser console for details.</p>
-          <pre style={{ background: '#1e293b', padding: '16px', borderRadius: '8px', color: '#fbbf24', overflow: 'auto', fontSize: '12px' }}>
+        <div style={{ padding: '40px', color: '#fff', background: '#050505', minHeight: '100vh', fontFamily: 'Outfit, sans-serif' }}>
+          <h1 style={{ color: '#ef4444', fontSize: '32px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 'tighter', fontStyle: 'italic', marginBottom: '24px' }}>⚠ Neural Core Critical Failure</h1>
+          <p style={{ color: '#888', marginBottom: '24px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.2em' }}>The tactical intelligence layer has collapsed. Data-stream interrupted.</p>
+          <pre style={{ background: '#121212', padding: '24px', borderRadius: '2rem', border: '1px solid rgba(255,50,50,0.1)', color: '#FF5F01', overflow: 'auto', fontSize: '14px', fontWeight: 'bold' }}>
             {this.state.error?.toString()}
           </pre>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}
-            style={{ marginTop: '16px', padding: '8px 16px', background: '#06b6d4', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ marginTop: '24px', padding: '16px 32px', background: '#FF5F01', color: '#000', border: 'none', borderRadius: '1.5rem', cursor: 'pointer', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}
           >
-            Try Again
+            Re-Initialize Core
           </button>
         </div>
       );
@@ -56,16 +56,16 @@ const AppLayout = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#020617', color: '#fff', fontFamily: 'Outfit, sans-serif' }}>
-        <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '32px' }}>
-          <div style={{ position: 'absolute', inset: 0, border: '4px solid rgba(0,242,255,0.1)', borderTop: '4px solid #00f2ff', borderRadius: '50%', animation: 'spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite' }} />
-          <div style={{ position: 'absolute', inset: '10px', border: '2px solid rgba(0,242,255,0.05)', borderBottom: '2px solid #00f2ff', borderRadius: '50%', animation: 'spin 2s linear infinite reverse' }} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#050505', color: '#fff', fontFamily: 'Outfit, sans-serif' }}>
+        <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '40px' }}>
+          <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,95,1,0.1)', borderTop: '2px solid #FF5F01', borderRadius: '50%', animation: 'spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite' }} />
+          <div style={{ position: 'absolute', inset: '15px', border: '1px solid rgba(255,95,1,0.05)', borderBottom: '1px solid #FF5F01', borderRadius: '50%', animation: 'spin 2s linear infinite reverse' }} />
         </div>
-        <h3 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#00f2ff', textShadow: '0 0 10px rgba(0,242,255,0.3)' }}>
+        <h3 style={{ fontSize: '28px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#FF5F01', textShadow: '0 0 20px rgba(255,95,1,0.2)' }}>
           InjuryGuard <span style={{ color: '#fff' }}>AI</span>
         </h3>
-        <p style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#64748b', marginTop: '12px' }}>
-          Initializing Station Protocol
+        <p style={{ fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6em', color: '#444', marginTop: '16px' }}>
+          System Authorization Active
         </p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -84,10 +84,10 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="flex bg-deep-black min-h-screen text-slate-100 font-['Outfit']">
+    <div className="flex bg-[#050505] min-h-screen text-white font-['Outfit']">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      <main className="flex-1 overflow-y-auto p-8 lg:p-12 relative">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-electric-cyan/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <main className="flex-1 overflow-y-auto p-8 lg:p-16 relative">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <ErrorBoundary>
           <Routes location={location}>
             <Route path="/dashboard" element={<Dashboard />} />

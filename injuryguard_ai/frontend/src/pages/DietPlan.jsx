@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { Droplets, ArrowLeft, AlertTriangle, Flame, Activity } from 'lucide-react';
+import { Droplets, ArrowLeft, AlertTriangle, Flame, Activity, Utensils, Zap, Clock, ShieldCheck } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Injury badge colours — mirrors WorkoutPlan.jsx
 const INJURY_META = {
-    hamstring: { label: 'Hamstring Recovery', color: 'text-red-400', border: 'border-red-500/30', bg: 'bg-red-500/10' },
-    knee: { label: 'Knee & Cartilage', color: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' },
-    ankle: { label: 'Ankle Ligament', color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
-    groin: { label: 'Groin / Adductor', color: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-500/10' },
-    back: { label: 'Lumbar & Spine', color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
-    muscle: { label: 'Muscle Strain', color: 'text-orange-400', border: 'border-orange-500/30', bg: 'bg-orange-500/10' },
-    general: { label: 'General Performance', color: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-500/10' },
+    hamstring: { label: 'Hamstring Recovery', color: 'text-red-500', border: 'border-red-500/20', bg: 'bg-red-500/5' },
+    knee: { label: 'Knee & Cartilage', color: 'text-amber-500', border: 'border-amber-500/20', bg: 'bg-amber-500/5' },
+    ankle: { label: 'Ankle Ligament', color: 'text-blue-500', border: 'border-blue-500/20', bg: 'bg-blue-500/5' },
+    groin: { label: 'Groin / Adductor', color: 'text-purple-500', border: 'border-purple-500/20', bg: 'bg-purple-500/5' },
+    back: { label: 'Lumbar & Spine', color: 'text-emerald-500', border: 'border-emerald-500/20', bg: 'bg-emerald-500/5' },
+    muscle: { label: 'Muscle Strain', color: 'text-primary', border: 'border-primary/20', bg: 'bg-primary/5' },
+    general: { label: 'General Performance', color: 'text-primary', border: 'border-primary/20', bg: 'bg-primary/5' },
 };
 
 // Category accent colours for variety
 const CATEGORY_COLORS = [
-    { dot: 'bg-electric-cyan', title: 'text-electric-cyan', border: 'border-electric-cyan/20' },
-    { dot: 'bg-emerald-400', title: 'text-emerald-400', border: 'border-emerald-400/20' },
-    { dot: 'bg-orange-400', title: 'text-orange-400', border: 'border-orange-400/20' },
-    { dot: 'bg-violet-400', title: 'text-violet-400', border: 'border-violet-400/20' },
-    { dot: 'bg-rose-400', title: 'text-rose-400', border: 'border-rose-400/20' },
+    { dot: 'bg-primary', title: 'text-primary', border: 'border-primary/10' },
+    { dot: 'bg-emerald-500', title: 'text-emerald-500', border: 'border-emerald-500/10' },
+    { dot: 'bg-orange-500', title: 'text-orange-500', border: 'border-orange-500/10' },
+    { dot: 'bg-violet-500', title: 'text-violet-500', border: 'border-violet-500/10' },
+    { dot: 'bg-rose-500', title: 'text-rose-500', border: 'border-rose-500/10' },
 ];
 
 const DietPlan = () => {
@@ -35,7 +35,7 @@ const DietPlan = () => {
     const injuryKey = Object.keys(INJURY_META).find(k => injuryType.toLowerCase().includes(k)) || 'general';
     const injuryMeta = INJURY_META[injuryKey];
 
-    // Emoji fallback — always recognisable even without the image URL
+    // Emoji fallback
     const FOOD_EMOJI = {
         'Grilled Salmon': '🐟', 'Chicken Breast': '🍗', 'Grilled Chicken': '🍗',
         '3 Egg whites': '🥚', 'Scrambled Eggs': '🍳', 'Whey Isolate Shake': '🥛',
@@ -62,187 +62,163 @@ const DietPlan = () => {
     const handleImgError = (key) => setImgErrors(prev => ({ ...prev, [key]: true }));
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center text-electric-cyan font-black">
-            LOADING NUTRITIONAL ARCHITECTURE...
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#050505] font-['Outfit'] gap-6">
+            <div className="relative w-16 h-16">
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 border-4 border-primary/10 border-t-primary rounded-full shadow-[0_0_20px_#FF5F0122]"
+                />
+                <Utensils className="absolute inset-0 m-auto text-primary h-6 w-6 animate-pulse" />
+            </div>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em] italic">Synthesizing Macro-Architecture...</p>
         </div>
     );
-    if (!plan) return <div>Error loading plan.</div>;
+
+    if (!plan) return <div className="min-h-screen flex items-center justify-center text-white">Error loading nutritional protocol.</div>;
 
     return (
-        <div className="min-h-screen p-6 lg:p-12 font-['Outfit']">
-            <button
-                onClick={() => navigate(-1)}
-                className="mb-8 flex items-center gap-2 text-slate-500 hover:text-white transition-colors uppercase font-black text-xs tracking-widest"
-            >
-                <ArrowLeft size={16} /> Back to Dashboard
-            </button>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-                {/* ── Main Content ── */}
-                <div className="lg:col-span-2 space-y-8">
-
-                    {/* Header card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="glass-card p-10 relative overflow-hidden"
+        <div className="min-h-screen p-8 lg:p-16 font-['Outfit'] bg-[#050505] space-y-16 pb-24">
+            {/* Header / Nav */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+                <div className="flex items-center gap-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="h-16 w-16 bg-zinc-900 rounded-2xl flex items-center justify-center border border-white/5 text-zinc-600 hover:text-primary hover:border-primary/20 transition-all shadow-xl group"
                     >
-                        <div className="absolute top-0 right-0 p-4 bg-electric-cyan/10 border-b border-l border-electric-cyan/20 text-[10px] font-black text-electric-cyan uppercase tracking-widest">
-                            Nutrition_V2.0
+                        <ArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <div>
+                        <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic">Nutritional <span className="text-primary italic">Intelligence</span></h1>
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em] leading-none mt-2 opacity-60">Fleet Biological Support // Optimized Consumption</p>
+                    </div>
+                </div>
+
+                <div className={`inline-flex items-center gap-4 px-6 py-3 rounded-[1.5rem] border ${injuryMeta.border} ${injuryMeta.bg}`}>
+                    <div className={`h-2 w-2 rounded-full ${injuryMeta.color.replace('text', 'bg')} shadow-[0_0_10px_currentColor]`} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${injuryMeta.color}`}>
+                        {plan.injury_type?.toUpperCase() === 'GENERAL' ? 'Conditioning Target' : `${plan.injury_type?.toUpperCase()} PROTOCOL`}
+                    </span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                {/* Main Intel */}
+                <div className="lg:col-span-8 space-y-12">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="glass-card p-12 lg:p-16 relative overflow-hidden shadow-4xl"
+                    >
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-primary">
+                            <Utensils size={120} />
                         </div>
 
-                        {/* Injury badge */}
-                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${injuryMeta.border} ${injuryMeta.bg} mb-6`}>
-                            <AlertTriangle size={12} className={injuryMeta.color} />
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${injuryMeta.color}`}>
-                                {plan.injury_type?.toUpperCase() === 'GENERAL' ? 'Standard Prevention' : `${plan.injury_type?.toUpperCase()} Recovery`} — Targeted Nutrition
-                            </span>
+                        <div className="space-y-4 mb-16 relative z-10">
+                            <h2 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter italic leading-none max-w-2xl">{plan.title}</h2>
+                            <p className="text-zinc-600 text-lg font-bold italic leading-relaxed max-w-xl opacity-80">{plan.subtitle}</p>
                         </div>
 
-                        {plan.injury_type?.toUpperCase() === 'GENERAL' && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="mb-8 p-4 bg-electric-cyan/5 border border-electric-cyan/20 rounded-2xl flex items-center justify-between gap-4"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-xl bg-electric-cyan/10 flex items-center justify-center text-electric-cyan">
-                                        <Activity size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-white uppercase tracking-widest">No Active Injury Detected</p>
-                                        <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">Run a diagnostic scan for a personalized recovery plan.</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/assessment')}
-                                    className="px-4 py-2 bg-electric-cyan text-deep-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-cyan-300 transition-all"
-                                >
-                                    Start Scan
-                                </button>
-                            </motion.div>
-                        )}
-
-                        <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-3 italic leading-tight">
-                            {plan.title}
-                        </h1>
-                        <p className="text-slate-400 font-bold text-xs mb-10 border-l-2 border-electric-cyan pl-4">
-                            {plan.subtitle}
-                        </p>
-
-                        {/* Food sections grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
                             {plan.sections.map((section, idx) => {
                                 const c = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
                                 return (
-                                    <motion.div
-                                        key={idx}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.08 }}
-                                        className="space-y-3"
-                                    >
-                                        {/* Section header */}
-                                        <h3 className={`${c.title} font-black uppercase text-xs tracking-[0.2em] flex items-center gap-2`}>
-                                            <div className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+                                    <div key={idx} className="space-y-6">
+                                        <h3 className={`${c.title} font-black uppercase text-[10px] tracking-[0.4em] flex items-center gap-4 italic`}>
+                                            <div className={`h-2 w-2 rounded-full ${c.dot} shadow-[0_0_8px_currentColor]`} />
                                             {section.category}
                                         </h3>
 
-                                        {/* Food items */}
-                                        <ul className="space-y-2">
+                                        <div className="space-y-4">
                                             {section.items.map((item, i) => {
                                                 const imgKey = `${idx}-${i}`;
-                                                const hasError = imgErrors[imgKey];
                                                 return (
-                                                    <li
-                                                        key={i}
-                                                        className={`flex items-center gap-3 bg-white/5 p-3 rounded-xl border ${c.border} hover:bg-white/10 transition-all`}
-                                                    >
-                                                        {/* Food image — TheMealDB CDN, falls back to emoji */}
-                                                        <div className="h-14 w-14 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-slate-800">
-                                                            {!hasError ? (
-                                                                <img
-                                                                    src={item.image}
-                                                                    alt={item.name}
-                                                                    className="h-full w-full object-cover"
-                                                                    onError={() => handleImgError(imgKey)}
-                                                                />
-                                                            ) : (
-                                                                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-900 text-2xl">
-                                                                    {FOOD_EMOJI[item.name] ||
-                                                                        FOOD_EMOJI[Object.keys(FOOD_EMOJI).find(k => item.name.toLowerCase().includes(k.toLowerCase()))] ||
-                                                                        '🍽️'}
-                                                                </div>
-                                                            )}
+                                                    <div key={i} className={`flex items-center justify-between p-4 bg-white/[0.02] rounded-3xl border ${c.border} hover:bg-white/[0.04] transition-all group cursor-default`}>
+                                                        <div className="flex items-center gap-5">
+                                                            <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-white/5 bg-zinc-900 flex items-center justify-center text-2xl group-hover:scale-110 transition-all duration-500">
+                                                                {!imgErrors[imgKey] ? (
+                                                                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" onError={() => handleImgError(imgKey)} />
+                                                                ) : (
+                                                                    <span>{FOOD_EMOJI[item.name] || '🍽️'}</span>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-zinc-400 font-black text-xs uppercase tracking-tight group-hover:text-white transition-colors italic">{item.name}</span>
                                                         </div>
-
-                                                        {/* Food name */}
-                                                        <span className="text-slate-200 font-semibold text-sm">{item.name}</span>
-                                                    </li>
+                                                        <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-800 transition-colors">
+                                                            <Zap size={14} />
+                                                        </div>
+                                                    </div>
                                                 );
                                             })}
-                                        </ul>
-                                    </motion.div>
+                                        </div>
+                                    </div>
                                 );
                             })}
                         </div>
                     </motion.div>
 
-                    {/* Hydration */}
-                    <div className="glass-card p-6 bg-blue-500/5 border-blue-500/20 flex items-center gap-6">
-                        <div className="h-14 w-14 bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/30 shrink-0">
-                            <Droplets className="text-blue-400" size={28} />
+                    {/* Hydration Card */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-10 bg-blue-500/5 border-blue-500/10 flex items-center gap-8 shadow-3xl">
+                        <div className="h-20 w-20 bg-blue-500/10 rounded-3xl flex items-center justify-center border border-blue-500/20 shrink-0 shadow-blue-500/5">
+                            <Droplets className="text-blue-500" size={36} />
                         </div>
-                        <div>
-                            <h4 className="text-white font-black uppercase text-xs tracking-widest mb-1">Hydration Protocol</h4>
-                            <p className="text-blue-300 font-bold text-sm">{plan.hydration}</p>
+                        <div className="space-y-2">
+                            <h4 className="text-white font-black uppercase text-xs tracking-widest italic">Phase-Specific Hydration</h4>
+                            <p className="text-blue-400 text-lg font-bold italic tracking-tight italic">{plan.hydration}</p>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
 
-                {/* ── Sidebar ── */}
-                <div className="space-y-8">
-                    <div className="glass-card overflow-hidden border-electric-cyan/20">
-                        <img src={plan.image} alt="Diet Plan" className="w-full h-72 object-cover opacity-80" />
-                        <div className="p-6">
-                            <h4 className="text-white font-black uppercase text-xs tracking-widest mb-2">Visual Reference</h4>
-                            <p className="text-slate-500 text-xs leading-relaxed font-medium">
-                                Standardized portion sizes and macro distribution calibrated by AI Nutrition Engine for your injury type.
-                            </p>
+                {/* Sidebar Visuals */}
+                <div className="lg:col-span-4 space-y-12">
+                    <div className="glass-card overflow-hidden shadow-4xl group">
+                        <div className="relative h-80 overflow-hidden">
+                            <img src={plan.image} alt="Plate" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000 opacity-80 group-hover:opacity-100" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                            <div className="absolute bottom-6 left-6 flex items-center gap-3">
+                                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Biological Sample_01</span>
+                            </div>
+                        </div>
+                        <div className="p-10 space-y-4">
+                            <h4 className="text-white font-black uppercase text-xs tracking-widest italic">Reference Architecture</h4>
+                            <p className="text-zinc-700 text-xs font-bold leading-relaxed opacity-80 uppercase tracking-widest">Macro-nutrient dispersion tailored for accelerated kinetic repair. Adhere to volume specifications strictly.</p>
                         </div>
                     </div>
 
-                    {/* Critical alert — injury specific */}
-                    <div className="glass-card p-6 border-amber-500/20 bg-amber-500/5">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Flame size={14} className="text-amber-500" />
-                            <h4 className="text-amber-500 font-black uppercase text-xs tracking-widest">Critical Alert</h4>
+                    {/* Timing Schedule */}
+                    <div className="glass-card p-10 space-y-8 shadow-3xl border-primary/5">
+                        <h4 className="text-white font-black uppercase text-xs tracking-widest italic flex items-center gap-3">
+                            <Clock className="text-primary" size={16} />
+                            Chronological Schedule
+                        </h4>
+                        <div className="space-y-6">
+                            {[
+                                { t: 'Dawn Phase', d: '7-9 AM: Pre-Kinetic Load', c: 'text-zinc-600' },
+                                { t: 'Prime Load', d: '90m Prior: Sustained Energy', c: 'text-primary' },
+                                { t: 'Recode Phase', d: 'Inside 30m: Anabolic Window', c: 'text-emerald-500' },
+                                { t: 'Rest Cycle', d: '3h Prior: Deep Cycle Repair', c: 'text-zinc-600' }
+                            ].map((s, i) => (
+                                <div key={i} className="flex gap-6 items-start">
+                                    <div className="h-10 w-px bg-zinc-900 relative">
+                                        <div className={`absolute top-0 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full ${s.c.replace('text', 'bg')}`} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase tracking-widest italic">{s.t}</p>
+                                        <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mt-1">{s.d}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <p className="text-slate-400 text-xs font-medium leading-relaxed">{plan.alert}</p>
                     </div>
 
-                    {/* Legend */}
-                    <div className="glass-card p-6">
-                        <h4 className="text-white font-black uppercase text-xs tracking-widest mb-4">Meal Timing</h4>
-                        <div className="space-y-3 text-xs text-slate-500 font-medium">
-                            <div className="flex items-start gap-3">
-                                <span className="text-electric-cyan font-black shrink-0">Breakfast</span>
-                                <span>2h before morning session or 7–9 AM</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <span className="text-emerald-400 font-black shrink-0">Pre-Train</span>
-                                <span>60–90 min before session</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <span className="text-orange-400 font-black shrink-0">Post-Train</span>
-                                <span>Within 30 min of finishing</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <span className="text-violet-400 font-black shrink-0">Dinner</span>
-                                <span>3–4h before sleep for optimal recovery</span>
-                            </div>
+                    {/* Alert */}
+                    <div className="glass-card p-10 bg-amber-500/5 border-amber-500/10 space-y-4 shadow-3xl">
+                        <div className="flex items-center gap-4">
+                            <ShieldCheck className="text-amber-500" size={24} />
+                            <h4 className="text-amber-500 font-black uppercase text-xs tracking-widest italic">Safety Protocol</h4>
                         </div>
+                        <p className="text-zinc-600 text-[10px] font-black leading-relaxed uppercase tracking-widest italic opacity-80">{plan.alert}</p>
                     </div>
                 </div>
             </div>

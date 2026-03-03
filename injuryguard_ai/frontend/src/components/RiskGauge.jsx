@@ -2,61 +2,89 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const RiskGauge = ({ value = 0, size = 200 }) => {
-    const radius = size * 0.4;
+    const radius = size * 0.45;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (value / 100) * circumference;
 
     const getColor = (val) => {
-        if (val < 40) return '#00f2ff'; // Electric Cyan
-        if (val < 70) return '#fbbf24'; // Yellow
-        return '#ef4444'; // Red
+        if (val < 40) return '#FF5F01'; // Sunset Orange (Healthy)
+        if (val < 70) return '#f59e0b'; // Amber (Caution)
+        return '#ef4444'; // Red (Critical)
     };
 
     const color = getColor(value);
 
     return (
-        <div className="relative flex items-center justify-center pt-5" style={{ width: size, height: size }}>
-            <svg className="transform -rotate-90" width={size} height={size}>
+        <div className="relative flex items-center justify-center pt-8" style={{ width: size, height: size }}>
+            <svg className="transform -rotate-90 overflow-visible" width={size} height={size}>
+                {/* Outer decorative ring */}
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius + 15}
+                    stroke="rgba(255,255,255,0.02)"
+                    strokeWidth="1"
+                    fill="transparent"
+                />
+
                 {/* Background track */}
                 <circle
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
-                    stroke="rgba(255,255,255,0.05)"
-                    strokeWidth="15"
+                    stroke="rgba(255,255,255,0.03)"
+                    strokeWidth="20"
                     fill="transparent"
                 />
+
+                {/* Progress arc */}
                 <motion.circle
                     cx={size / 2}
                     cy={size / 2}
                     r={radius}
                     stroke={color}
-                    strokeWidth="15"
+                    strokeWidth="20"
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    transition={{ duration: 2, ease: "circOut" }}
                     strokeLinecap="round"
                     fill="transparent"
-                    style={{ filter: `drop-shadow(0 0 8px ${color}80)` }}
+                    style={{ filter: `drop-shadow(0 0 15px ${color}33)` }}
+                />
+
+                {/* Inner progress markers (simulated) */}
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius - 20}
+                    stroke="rgba(255,255,255,0.01)"
+                    strokeWidth="1"
+                    strokeDasharray="4 8"
+                    fill="transparent"
                 />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center font-['Outfit']">
-                <motion.span
-                    initial={{ opacity: 0, scale: 0.5 }}
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center font-['Outfit'] pb-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-5xl font-black italic tracking-tighter"
-                    style={{ color }}
+                    className="flex flex-col items-center"
                 >
-                    {Math.round(value)}%
-                </motion.span>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-black mt-1">Risk Profile</span>
+                    <span
+                        className="text-6xl font-black italic tracking-tighter leading-none"
+                        style={{ color }}
+                    >
+                        {Math.round(value)}<span className="text-2xl ml-1 opacity-60">%</span>
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-600 mt-4 opacity-80">Risk Matrix</span>
+                </motion.div>
             </div>
 
-            {/* Glow effect */}
+            {/* Subtle glow container */}
             <div
-                className="absolute w-full h-full blur-[40px] opacity-20"
-                style={{ backgroundColor: color, borderRadius: '50%' }}
+                className="absolute inset-0 blur-[60px] opacity-10 pointer-events-none"
+                style={{ backgroundColor: color, borderRadius: '50%', transform: 'scale(0.8)' }}
             />
         </div>
     );
