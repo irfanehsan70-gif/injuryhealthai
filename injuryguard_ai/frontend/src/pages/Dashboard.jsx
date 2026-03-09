@@ -279,12 +279,27 @@ const Dashboard = () => {
                     </h3>
                     <div className="space-y-4">
                         {sortedFactors.map((factor, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 bg-white/[0.01] rounded-3xl border border-white/5 group hover:border-primary/20 transition-all duration-300">
-                                <div className="flex items-center gap-5">
-                                    <div className="h-2 w-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
-                                    <span className="text-xs font-black text-zinc-400 uppercase tracking-widest group-hover:text-white transition-colors">{factor.replace('_', ' ')}</span>
+                            <div key={i} className="p-6 bg-white/[0.01] rounded-3xl border border-white/5 group hover:border-primary/20 transition-all duration-300">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-5">
+                                        <div className="h-2 w-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+                                        <span className="text-xs font-black text-zinc-400 uppercase tracking-widest group-hover:text-white transition-colors">
+                                            {typeof factor === 'string' ? factor.replace('_', ' ') : factor.name.replace('_', ' ')}
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] font-black text-primary italic">
+                                        {typeof factor === 'string' ? '' : `${factor.impact}%`}
+                                    </span>
                                 </div>
-                                <ArrowUpRight className="text-zinc-800 group-hover:text-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" size={20} />
+                                {factor.impact && (
+                                    <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${factor.impact}%` }}
+                                            className="h-full bg-primary shadow-[0_0_10px_#FF5F01]"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

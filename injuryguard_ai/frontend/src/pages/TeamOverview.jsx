@@ -190,7 +190,7 @@ const TeamOverview = () => {
                                 </div>
                                 <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Fleet Mean Stress</h4>
                                 <div className="flex items-end gap-5">
-                                    <h2 className="text-6xl font-black text-primary italic tracking-tighter">{results.avg_risk}%</h2>
+                                    <h2 className="text-6xl font-black text-primary italic tracking-tighter">{results.avg_risk.toFixed(2)}%</h2>
                                     <TrendingUp className="text-primary/40 mb-3" size={32} />
                                 </div>
                                 <div className="mt-8 flex items-center gap-3">
@@ -303,7 +303,7 @@ const TeamOverview = () => {
                                                 U-{i + 1}
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-2xl font-black text-red-500 italic leading-none">{Math.round((1 - (p.Injury_Risk === 0 ? 0.3 : 0.7)) * 100)}%</p>
+                                                <p className="text-2xl font-black text-red-500 italic leading-none">{p.risk_prob ? p.risk_prob.toFixed(2) : Math.round((1 - (p.Injury_Risk === 0 ? 0.3 : 0.7)) * 100).toFixed(2)}%</p>
                                                 <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1">STRESS</p>
                                             </div>
                                         </div>
@@ -390,7 +390,7 @@ const TeamOverview = () => {
                                                             <div className="grid grid-cols-2 gap-10 mb-8 border-t border-white/5 pt-8">
                                                                 <div>
                                                                     <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2">Current Risk</p>
-                                                                    <p className="text-3xl font-black text-red-500 italic tracking-tighter">{player.latest_assessment.result.risk_prob}%</p>
+                                                                    <p className="text-3xl font-black text-red-500 italic tracking-tighter">{player.latest_assessment.result.risk_prob.toFixed(2)}%</p>
                                                                 </div>
                                                                 <div className="text-right">
                                                                     <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-2">Primary Site</p>

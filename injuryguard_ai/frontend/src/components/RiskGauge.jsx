@@ -75,7 +75,7 @@ const RiskGauge = ({ value = 0, size = 200 }) => {
                         className="text-6xl font-black italic tracking-tighter leading-none"
                         style={{ color }}
                     >
-                        {Math.round(value)}<span className="text-2xl ml-1 opacity-60">%</span>
+                        {value.toFixed(2)}<span className="text-2xl ml-1 opacity-60">%</span>
                     </span>
                     <span className="text-[9px] font-black uppercase tracking-[0.5em] text-zinc-600 mt-4 opacity-80">Risk Matrix</span>
                 </motion.div>

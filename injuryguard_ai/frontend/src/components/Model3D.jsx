@@ -4,18 +4,24 @@ import { motion } from 'framer-motion';
 const INJURY_COLORS = {
     Hamstring: '#ff0000', // Critical Red
     ACL: '#ff4400',       // Deep Orange
+    Knee: '#ff4400',
     Ankle: '#3b82f6',     // Blue
     Groin: '#a855f7',     // Purple
     Shoulder: '#ec4899',  // Pink
+    Back: '#f59e0b',      // Amber
+    Muscle: '#10b981',    // Emerald
     None: '#27272a',      // Zinc
 };
 
 const BodyPartSVG = ({ highlighted }) => {
-    const isHamstring = highlighted === 'Hamstring';
-    const isACL = highlighted === 'ACL';
-    const isAnkle = highlighted === 'Ankle';
-    const isGroin = highlighted === 'Groin';
-    const isShoulder = highlighted === 'Shoulder';
+    const part = String(highlighted || '').toLowerCase();
+    const isMuscle = part === 'muscle';
+    const isHamstring = part === 'hamstring' || isMuscle;
+    const isACL = part === 'acl' || part === 'knee';
+    const isAnkle = part === 'ankle';
+    const isGroin = part === 'groin';
+    const isShoulder = part === 'shoulder' || isMuscle;
+    const isBack = part === 'back';
 
     const blinkAnimation = {
         initial: { opacity: 0.8 },
@@ -61,8 +67,8 @@ const BodyPartSVG = ({ highlighted }) => {
             <motion.rect x="17" y="54" width="14" height="70" rx="7" style={getPartStyle(isShoulder)} {...(isShoulder ? blinkAnimation : {})} />
             <motion.rect x="89" y="54" width="14" height="70" rx="7" style={getPartStyle(isShoulder)} {...(isShoulder ? blinkAnimation : {})} />
 
-            {/* TORSO */}
-            <rect x="34" y="66" width="52" height="60" rx="12" style={getPartStyle(false)} fill="url(#bodyGrad)" />
+            {/* TORSO / BACK */}
+            <motion.rect x="34" y="66" width="52" height="60" rx="12" style={getPartStyle(isBack)} {...(isBack ? blinkAnimation : {})} />
 
             {/* GROIN / HIPS */}
             <motion.rect x="32" y="124" width="56" height="22" rx="11" style={getPartStyle(isGroin)} {...(isGroin ? blinkAnimation : {})} />
@@ -71,7 +77,7 @@ const BodyPartSVG = ({ highlighted }) => {
             <motion.rect x="33" y="146" width="22" height="72" rx="11" style={getPartStyle(isHamstring)} {...(isHamstring ? blinkAnimation : {})} />
             <motion.rect x="65" y="146" width="22" height="72" rx="11" style={getPartStyle(isHamstring)} {...(isHamstring ? blinkAnimation : {})} />
 
-            {/* KNEES */}
+            {/* KNEES / ACL */}
             <motion.ellipse cx="44" cy="222" rx="12" ry="10" style={getPartStyle(isACL)} {...(isACL ? blinkAnimation : {})} />
             <motion.ellipse cx="76" cy="222" rx="12" ry="10" style={getPartStyle(isACL)} {...(isACL ? blinkAnimation : {})} />
 
@@ -91,8 +97,13 @@ const BodyPartSVG = ({ highlighted }) => {
 };
 
 const Model3D = ({ highlightedPart = 'None' }) => {
-    const currentColor = INJURY_COLORS[highlightedPart] || INJURY_COLORS.None;
-    const hasActiveHighlight = highlightedPart && highlightedPart !== 'None';
+    // Case-insensitive lookup
+    const partKey = Object.keys(INJURY_COLORS).find(
+        k => k.toLowerCase() === String(highlightedPart || 'None').toLowerCase()
+    ) || 'None';
+
+    const currentColor = INJURY_COLORS[partKey];
+    const hasActiveHighlight = partKey !== 'None';
 
     return (
         <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center font-['Outfit'] overflow-hidden rounded-[2.5rem] bg-black/20 border border-white/5">
@@ -106,16 +117,10 @@ const Model3D = ({ highlightedPart = 'None' }) => {
             />
 
             {/* System Status Headers */}
-            <div className="absolute top-8 left-10 space-y-1">
-                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.4em] italic mb-2">Diagnostic Scan</p>
-                {hasActiveHighlight ? (
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 py-2 rounded-xl">
-                        <div className="h-2 w-2 rounded-full animate-pulse shadow-glow" style={{ backgroundColor: currentColor }} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white italic">{highlightedPart} RISK ZONE</span>
-                    </div>
-                ) : (
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-700 italic">SYSTEM_IDLE: UNIFORM_LOAD</span>
-                )}
+            {/* System Status - Cleaned up to avoid overlap with Dashboard */}
+            <div className="absolute top-8 left-10 opacity-30 pointer-events-none">
+                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em] italic leading-none">Scanning Engine Active</p>
+                <div className="h-[1px] w-12 bg-primary/20 mt-2" />
             </div>
 
             <div className="absolute top-8 right-10 text-right opacity-30">

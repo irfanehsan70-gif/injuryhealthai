@@ -101,7 +101,7 @@ const PlayerDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 <MetricCard
                     label="Current Risk Index"
-                    value={latest ? `${latest.risk_prob}%` : '0%'}
+                    value={latest ? `${latest.risk_prob.toFixed(2)}%` : '0.00%'}
                     subLabel={latest ? latest.risk_label : 'NOT SCANNED'}
                     icon={Activity}
                     color={latest?.risk_prob > 50 ? '#ef4444' : '#FF5F01'}
@@ -266,7 +266,7 @@ const PlayerDashboard = () => {
                                         </div>
                                         <div className="flex items-center gap-12">
                                             <div className="text-right">
-                                                <p className={`text-3xl font-black italic tracking-tighter leading-none ${a.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>{a.risk_prob}%</p>
+                                                <p className={`text-3xl font-black italic tracking-tighter leading-none ${a.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>{a.risk_prob.toFixed(2)}%</p>
                                                 <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest mt-1">RISK INDEX</p>
                                             </div>
                                             <button

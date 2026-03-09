@@ -86,14 +86,19 @@ def train():
 
     # ── STAGE 1: Binary classifier ──────────────────────────────
     print("\n[2] Training binary classifier (injured / not injured)...")
-    binary_clf = GradientBoostingClassifier(
-        n_estimators=400,          # Increased for accuracy
-        learning_rate=0.05,        # Slower learning for better generalization
-        max_depth=5,               # Deeper to capture new nonlinear interactions
-        subsample=0.85,
-        min_samples_leaf=15,
+    from sklearn.calibration import CalibratedClassifierCV
+    
+    base_binary_clf = GradientBoostingClassifier(
+        n_estimators=200,          # Reduced to avoid over-confidence
+        learning_rate=0.05,
+        max_depth=3,               # Shallower trees for smoother probabilities
+        subsample=0.8,
+        min_samples_leaf=20,
         random_state=42
     )
+    
+    # Use calibration to prevent probabilities from being "all 0 or all 1"
+    binary_clf = CalibratedClassifierCV(base_binary_clf, method='sigmoid', cv=5)
     binary_clf.fit(X_tr, yb_tr)
     yb_pred  = binary_clf.predict(X_te)
     bin_acc  = accuracy_score(yb_te, yb_pred)
@@ -143,8 +148,11 @@ def train():
     print(f"    Type Accuracy: {type_acc*100:.1f}%")
     print(classification_report(yt_inj_te, yt_pred, zero_division=0))
 
-    # Feature importance from binary model
-    importances = binary_clf.feature_importances_.tolist()
+    # Feature importance from binary model (average across calibrated ensemble)
+    importances = np.mean([
+        getattr(c.estimator, 'feature_importances_', np.zeros(len(FEATURE_COLS)))
+        for c in binary_clf.calibrated_classifiers_
+    ], axis=0).tolist()
     report      = classification_report(yt_inj_te, yt_pred, output_dict=True, zero_division=0)
     wa          = report.get('weighted avg', {})
 

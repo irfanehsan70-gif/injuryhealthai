@@ -33,15 +33,15 @@ const AssessmentForm = () => {
         PlayerEmail: initialPlayer?.email || (user?.role === 'player' ? user?.email : ''),
         League: initialPlayer?.profile?.league || 'Premier League',
         CompetitionLevel: 'Professional',
-        Age: initialPlayer?.profile?.age || 25,
+        Age: Number(initialPlayer?.profile?.age || 25),
         Position: initialPlayer?.profile?.position || 'Forward',
-        Seasons_Played: initialPlayer?.profile?.seasons_played || 5,
-        Matches_Per_Season: initialPlayer?.profile?.matches_per_season || 30,
-        Minutes_Per_Season: initialPlayer?.profile?.minutes_per_season || 2400,
-        High_Speed_Runs: initialPlayer?.profile?.high_speed_runs || 80,
-        Previous_Injuries: initialPlayer?.profile?.previous_injuries || 1,
-        Recurrence_Flag: initialPlayer?.profile?.recurrence_flag || 0,
-        Fatigue_Index: initialPlayer?.profile?.fatigue_index || 1.5,
+        Seasons_Played: Number(initialPlayer?.profile?.seasons_played || 5),
+        Matches_Per_Season: Number(initialPlayer?.profile?.matches_per_season || 30),
+        Minutes_Per_Season: Number(initialPlayer?.profile?.minutes_per_season || 2400),
+        High_Speed_Runs: Number(initialPlayer?.profile?.high_speed_runs || 80),
+        Previous_Injuries: Number(initialPlayer?.profile?.previous_injuries || 1),
+        Recurrence_Flag: Number(initialPlayer?.profile?.recurrence_flag || 0),
+        Fatigue_Index: Number(initialPlayer?.profile?.fatigue_index || 1.5),
         dominant_side: initialPlayer?.profile?.dominant_side || 'R'
     });
 
@@ -65,15 +65,15 @@ const AssessmentForm = () => {
                             ...prev,
                             PlayerName: playerName,
                             League: p.league || prev.League,
-                            Age: p.age || prev.Age,
+                            Age: Number(p.age || prev.Age),
                             Position: p.position || prev.Position,
-                            Seasons_Played: p.seasons_played || prev.Seasons_Played,
-                            Matches_Per_Season: p.matches_per_season || prev.Matches_Per_Season,
-                            Minutes_Per_Season: p.minutes_per_season || prev.Minutes_Per_Season,
-                            High_Speed_Runs: p.high_speed_runs || prev.High_Speed_Runs,
-                            Previous_Injuries: p.previous_injuries || prev.Previous_Injuries,
-                            Recurrence_Flag: p.recurrence_flag || prev.Recurrence_Flag,
-                            Fatigue_Index: p.fatigue_index || prev.Fatigue_Index,
+                            Seasons_Played: Number(p.seasons_played || prev.Seasons_Played),
+                            Matches_Per_Season: Number(p.matches_per_season || prev.Matches_Per_Season),
+                            Minutes_Per_Season: Number(p.minutes_per_season || prev.Minutes_Per_Season),
+                            High_Speed_Runs: Number(p.high_speed_runs || prev.High_Speed_Runs),
+                            Previous_Injuries: Number(p.previous_injuries || prev.Previous_Injuries),
+                            Recurrence_Flag: Number(p.recurrence_flag || prev.Recurrence_Flag),
+                            Fatigue_Index: Number(p.fatigue_index || prev.Fatigue_Index),
                             dominant_side: p.dominant_side || prev.dominant_side
                         }));
 
@@ -313,7 +313,7 @@ const AssessmentForm = () => {
                                     <div className="flex justify-between items-end px-1">
                                         <label className="text-xs font-black text-zinc-600 uppercase tracking-widest">Metabolic Fatigue Index</label>
                                         <span className={`text-4xl font-black italic tracking-tighter ${formData.Fatigue_Index > 2 ? 'text-red-500' : 'text-primary'}`}>
-                                            {formData.Fatigue_Index.toFixed(1)}
+                                            {Number(formData.Fatigue_Index || 0).toFixed(1)}
                                         </span>
                                     </div>
                                     <input
