@@ -1,0 +1,25 @@
+USERS:
+pep@gmail.com, coach, BARCELONA
+messi@gmail.com, player, BARCELONA
+suarez@gmail.com, player, BARCELONA
+stegen@gmail.com, player, BARCELONA
+irfan@gmail.com, player, BARCELONA
+pishon@gmail.com, admin, BARCELONA
+alba@gmail.com, player, BARCELONA
+PLAYERS:
+, None
+Messi, None
+Suarez, None
+Messi, None
+T, None
+F, None
+M, None
+Suarez, None
+Suarez, None
+Ter stegen, None
+Irfan, None
+Messi, BARCELONA
+Suarez, BARCELONA
+Ter stegen, BARCELONA
+Irfan, BARCELONA
+Retrain Test, BARCELONA

@@ -1,0 +1,9 @@
+First player raw doc:
+  _id: type=ObjectId, value=ObjectId('69af1825e913237bd456ef5b')
+  name: type=str, value='Messi'
+  team_name: type=str, value='BARCELONA'
+  coach: type=str, value='pishon@gmail.com'
+  last_assessment: type=datetime, value=datetime.datetime(2026, 3, 9, 18, 59, 3, 553000)
+  last_risk: type=float, value=98.8
+  last_type: type=str, value='Knee'
+  position: type=str, value='Winger'

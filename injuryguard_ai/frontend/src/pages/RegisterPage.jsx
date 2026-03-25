@@ -65,6 +65,7 @@ const RegisterPage = () => {
     const [confirm, setConfirm] = useState('');
     const [role, setRole] = useState('player');
     const [teamName, setTeamName] = useState('');
+    const [adminClearance, setAdminClearance] = useState('Level 4 - Fleet Commander');
 
     // Step 1: Player profile
     const [profile, setProfile] = useState({
@@ -98,7 +99,7 @@ const RegisterPage = () => {
     const set = (key) => (e) => setProfile(prev => ({ ...prev, [key]: e.target.value }));
     const setCoach = (key) => (e) => setCoachProfile(prev => ({ ...prev, [key]: e.target.value }));
 
-    const STEPS = role === 'coach' ? ['Account Credentials', 'Professional Profile', 'Review & Deploy'] : ['Account Credentials', 'Biometric Profile', 'Review & Deploy'];
+    const STEPS = (role === 'coach' || role === 'admin') ? ['Account Credentials', 'Professional Profile', 'Review & Deploy'] : ['Account Credentials', 'Biometric Profile', 'Review & Deploy'];
 
     const validateStep0 = () => {
         if (!name.trim()) { setError('Unit name required.'); return false; }
@@ -114,8 +115,10 @@ const RegisterPage = () => {
         if (role === 'player') {
             if (!profile.age || isNaN(profile.age) || +profile.age < 12 || +profile.age > 60) { setError('Identify valid age threshold.'); return false; }
             if (!profile.seasons_played || isNaN(profile.seasons_played)) { setError('Service duration required.'); return false; }
-        } else {
+        } else if (role === 'coach') {
             if (!coachProfile.experience) { setError('Professional tenure required.'); return false; }
+        } else if (role === 'admin') {
+            if (!adminClearance) { setError('Clearance protocol required.'); return false; }
         }
         return true;
     };
@@ -143,7 +146,7 @@ const RegisterPage = () => {
                 role,
                 team_name: teamName.trim(),
                 profile: role === 'player' ? { ...profile, age: +profile.age, seasons_played: +profile.seasons_played, matches_per_season: +profile.matches_per_season } : null,
-                coach_profile: role === 'coach' ? coachProfile : null
+                coach_profile: (role === 'coach' || role === 'admin') ? { ...coachProfile, clearance: adminClearance } : null
             });
             setStep(3);
         } catch (err) {
@@ -263,7 +266,8 @@ const RegisterPage = () => {
                                             <div className="flex gap-4 p-1 bg-black/40 rounded-[2rem] border border-white/5 mb-8">
                                                 {[
                                                     { id: 'player', label: 'ATHLETE', icon: User },
-                                                    { id: 'coach', label: 'COMMAND', icon: Users },
+                                                    { id: 'coach', label: 'STRATEGIST', icon: Users },
+                                                    { id: 'admin', label: 'ADMIN', icon: ShieldCheck },
                                                 ].map(r => (
                                                     <button
                                                         key={r.id}
@@ -319,6 +323,26 @@ const RegisterPage = () => {
                                                 <Field label="Tactical Philosophy" icon={Target}>
                                                     <select value={coachProfile.playstyle} onChange={setCoach('playstyle')} className={selectCls}>
                                                         {['Possession-Based', 'High Press', 'Defensive', 'Counter-Attack'].map(s => <option key={s} value={s}>{s}</option>)}
+                                                    </select>
+                                                </Field>
+                                            </div>
+                                        ) : role === 'admin' ? (
+                                            <div className="space-y-8">
+                                                <div className="p-10 bg-primary/5 border border-primary/20 rounded-[2.5rem] flex flex-col items-center text-center gap-6">
+                                                    <ShieldCheck className="text-primary" size={48} />
+                                                    <div>
+                                                        <p className="text-white font-black uppercase tracking-widest italic text-lg">Team Administrator</p>
+                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.3em] mt-2">Full control over squad data & unit management for "{teamName || 'the fleet'}".</p>
+                                                    </div>
+                                                </div>
+                                                <Field label="Admin Clearance" icon={ShieldAlert}>
+                                                    <select 
+                                                        value={adminClearance} 
+                                                        onChange={(e) => setAdminClearance(e.target.value)} 
+                                                        className={selectCls}
+                                                    >
+                                                        <option value="Level 4 - Fleet Commander">Level 4 - Fleet Commander</option>
+                                                        <option value="Level 3 - Station Admin">Level 3 - Station Admin</option>
                                                     </select>
                                                 </Field>
                                             </div>
@@ -389,6 +413,13 @@ const RegisterPage = () => {
                                                         <div className="flex justify-between items-center text-sm font-bold">
                                                             <span className="text-zinc-700 uppercase tracking-widest text-[10px]">Seasons</span>
                                                             <span className="text-white uppercase italic">{profile.seasons_played}</span>
+                                                        </div>
+                                                    </>
+                                                ) : role === 'admin' ? (
+                                                    <>
+                                                        <div className="flex justify-between items-center text-sm font-bold">
+                                                            <span className="text-zinc-700 uppercase tracking-widest text-[10px]">Clearance</span>
+                                                            <span className="text-white uppercase italic">{adminClearance}</span>
                                                         </div>
                                                     </>
                                                 ) : (

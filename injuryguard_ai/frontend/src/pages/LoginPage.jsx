@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [activeRole, setActiveRole] = useState('coach');
+    const [activeRole, setActiveRole] = useState('admin');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();
@@ -117,16 +117,17 @@ const LoginPage = () => {
                         <form onSubmit={handleLogin} className="space-y-10">
                             <div className="flex gap-4 p-1 bg-black/40 rounded-[2rem] border border-white/5">
                                 {[
-                                    { id: 'coach', label: 'COACH', icon: ShieldCheck },
+                                    { id: 'admin', label: 'ADMIN', icon: ShieldCheck },
+                                    { id: 'coach', label: 'COACH', icon: Zap },
                                     { id: 'player', label: 'PLAYER', icon: Target }
                                 ].map((r) => (
                                     <button
                                         key={r.id}
                                         type="button"
                                         onClick={() => setActiveRole(r.id)}
-                                        className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-[1.8rem] transition-all duration-500 font-black text-xs tracking-widest ${activeRole === r.id ? 'bg-primary text-black shadow-3xl shadow-primary/20 italic' : 'text-zinc-700 hover:text-zinc-500 hover:bg-white/5'}`}
+                                        className={`flex-1 flex items-center justify-center gap-3 py-5 rounded-[1.8rem] transition-all duration-500 font-black text-[10px] tracking-widest ${activeRole === r.id ? 'bg-primary text-black shadow-3xl shadow-primary/20 italic' : 'text-zinc-700 hover:text-zinc-500 hover:bg-white/5'}`}
                                     >
-                                        <r.icon size={18} />
+                                        <r.icon size={16} />
                                         {r.label}
                                     </button>
                                 ))}

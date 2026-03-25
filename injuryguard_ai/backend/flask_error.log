@@ -1,0 +1,40 @@
+
+2026-03-10 17:47:51.000568 Exception in predict:
+Traceback (most recent call last):
+  File "C:\Users\97335\.gemini\antigravity\scratch\injuryguard_ai\backend\app.py", line 308, in predict
+    hsr = float(standard_data.get('High_Speed_Runs', 80))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+
+
+2026-03-10 17:49:20.130170 Exception in predict:
+Traceback (most recent call last):
+  File "C:\Users\97335\.gemini\antigravity\scratch\injuryguard_ai\backend\app.py", line 304, in predict
+    age = float(standard_data.get('Age', 25))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+
+
+2026-03-10 17:49:35.976085 Exception in predict:
+Traceback (most recent call last):
+  File "C:\Users\97335\.gemini\antigravity\scratch\injuryguard_ai\backend\app.py", line 304, in predict
+    age = float(standard_data.get('Age', 25))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+
+
+2026-03-10 17:49:44.931233 Exception in predict:
+Traceback (most recent call last):
+  File "C:\Users\97335\.gemini\antigravity\scratch\injuryguard_ai\backend\app.py", line 304, in predict
+    age = float(standard_data.get('Age', 25))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+
+
+2026-03-10 17:50:03.684607 Exception in predict:
+Traceback (most recent call last):
+  File "C:\Users\97335\.gemini\antigravity\scratch\injuryguard_ai\backend\app.py", line 304, in predict
+    age = float(standard_data.get('Age', 25))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+

@@ -23,13 +23,20 @@ import {
     History,
     Info,
     Zap,
+    ShieldAlert,
     Users,
     Trophy,
     GraduationCap,
     CheckCircle,
     Apple,
     Dumbbell,
-    RefreshCw
+    RefreshCw,
+    Activity,
+    BrainCircuit,
+    Cpu,
+    TrendingUp,
+    Database,
+    LayoutDashboard
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -41,13 +48,20 @@ const Dashboard = () => {
     const [data, setData] = useState(location.state?.prediction || null);
     const [input, setInput] = useState(location.state?.input || null);
     const [player, setPlayer] = useState(location.state?.player || null);
+    const [stats, setStats] = useState({ total_predictions: 0, high_risk_count: 0, avg_risk_score: 0, pending_verifications: 0 });
     const [playerCount, setPlayerCount] = useState(0);
 
     useEffect(() => {
-        if (!data && user?.role === 'coach') {
-            api.get('/players')
-                .then(res => setPlayerCount(res.data.length))
+        if (!data) {
+            api.get('/dashboard_stats')
+                .then(res => setStats(res.data))
                 .catch(err => console.error(err));
+
+            if (user?.role === 'coach' || user?.role === 'admin') {
+                api.get('/players')
+                    .then(res => setPlayerCount(res.data.length))
+                    .catch(err => console.error(err));
+            }
         }
     }, [data, user]);
 
@@ -70,31 +84,42 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                     {/* Coach Identity Card */}
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-card p-12 border-l-4 border-l-primary relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform">
-                            <GraduationCap size={120} />
+                            <ShieldCheck size={120} />
                         </div>
-                        <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Director of Performance</p>
+                        <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">{user?.role === 'admin' ? 'Strategic Administrator' : 'Director of Performance'}</p>
                         <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-3 italic">{user?.name}</h2>
                         <div className="space-y-2 border-t border-white/5 pt-5">
-                            <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-none">{user?.coach_profile?.role_type || 'ELITE STRATEGIST'}</p>
-                            <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tight italic">LICENSE: {user?.coach_profile?.license || 'PRO'} // PLATFORM AUTHORITY</p>
+                            <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-none">{user?.role === 'admin' ? 'STATION COMMAND' : (user?.coach_profile?.role_type || 'ELITE STRATEGIST')}</p>
+                            <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-tight italic">
+                                {user?.role === 'admin' 
+                                    ? `CLEARANCE: ${user?.coach_profile?.clearance || 'LEVEL 3'}` 
+                                    : `LICENSE: ${user?.coach_profile?.license || 'PRO'} // PLATFORM AUTHORITY`
+                                }
+                            </p>
                         </div>
                     </motion.div>
 
-                    {/* Tactics Card */}
-                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card p-12 border-l-4 border-l-zinc-700 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
-                            <Trophy size={120} />
-                        </div>
-                        <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Tactical Philosophy</p>
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-3 italic">{user?.coach_profile?.playstyle || 'MODERN'}</h2>
-                        <div className="space-y-2 border-t border-white/5 pt-5">
-                            <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none">STRATEGY: {user?.coach_profile?.playstyle}</p>
-                        </div>
-                    </motion.div>
+                    {/* Pending Verification - Admin Only */}
+                    {user?.role === 'admin' && (
+                        <motion.div 
+                            initial={{ y: 20, opacity: 0 }} 
+                            animate={{ y: 0, opacity: 1 }} 
+                            transition={{ delay: 0.1 }} 
+                            onClick={() => navigate('/verify')}
+                            className="glass-card p-12 border-l-4 border-l-amber-500 relative overflow-hidden group cursor-pointer hover:bg-amber-500/5 transition-all"
+                        >
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+                                <ShieldAlert size={120} />
+                            </div>
+                            <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Pending Authorization</p>
+                            <h2 className={`text-7xl font-black uppercase tracking-tighter italic ${stats.pending_verifications > 0 ? 'text-amber-500' : 'text-white'}`}>{stats.pending_verifications}</h2>
+                            <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.3em] mt-5">REQUIRE CLEARANCE</p>
+                        </motion.div>
+                    )}
 
                     {/* Squad Strength Card */}
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card p-12 border-l-4 border-l-[#FF2E00] relative overflow-hidden group">
@@ -104,6 +129,177 @@ const Dashboard = () => {
                         <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Network Active Units</p>
                         <h2 className="text-7xl font-black text-white uppercase tracking-tighter italic">{playerCount}</h2>
                         <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mt-5">REGISTERED ATHLETE PROFILES</p>
+                    </motion.div>
+
+                    {/* Tactics Card */}
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="glass-card p-12 border-l-4 border-l-zinc-700 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+                            <Trophy size={120} />
+                        </div>
+                        <p className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Tactical Philosophy</p>
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-3 italic">{user?.coach_profile?.playstyle || 'MODERN'}</h2>
+                        <div className="space-y-2 border-t border-white/5 pt-5">
+                            <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none">STRATEGY: {user?.coach_profile?.playstyle}</p>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Secondary Intelligence Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    {/* Operational Directives */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }} 
+                        animate={{ opacity: 1, x: 0 }} 
+                        transition={{ delay: 0.4 }}
+                        className="lg:col-span-4 glass-card p-12 space-y-12 border-b-4 border-b-primary/40 shadow-4xl"
+                    >
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-4 italic leading-none">
+                                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                                Operational Directives
+                            </h3>
+                            <ClipboardList size={20} className="text-zinc-800" />
+                        </div>
+                        
+                        <div className="space-y-8">
+                            {[
+                                { title: 'Load Management', status: 'ACTIVE', desc: 'Neural core monitoring player fatigue patterns.' },
+                                { title: 'Recovery Phase', status: 'STANDBY', desc: 'Squad stabilization protocols initializing post-session.' },
+                                { title: 'Tactical Sync', status: 'OPTIMAL', desc: 'Biometric feeds synchronized with strategy engine.' }
+                            ].map((d, i) => (
+                                <div key={i} className="space-y-3 group cursor-pointer">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-black text-white uppercase italic transition-colors group-hover:text-primary">{d.title}</p>
+                                        <span className="text-[8px] font-black text-primary px-3 py-1 bg-primary/10 rounded-full">{d.status}</span>
+                                    </div>
+                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest leading-relaxed">{d.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+
+                    {/* Infrastructure Feed */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }} 
+                        animate={{ opacity: 1, x: 0 }} 
+                        transition={{ delay: 0.5 }}
+                        className="lg:col-span-8 glass-card p-12 shadow-4xl relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-12 opacity-[0.01] pointer-events-none">
+                            <BrainCircuit size={250} className="text-white" />
+                        </div>
+                        <div className="flex items-center justify-between mb-16">
+                            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-4 italic leading-none">
+                                <Cpu size={20} className="text-primary" />
+                                Neural Core Connectivity
+                            </h3>
+                            <div className="flex items-center gap-6">
+                                <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">Latency: 12ms</span>
+                                <div className="flex gap-1">
+                                    {[1, 1, 1, 1, 0].map((b, i) => (
+                                        <div key={i} className={`h-3 w-1 rounded-full ${b ? 'bg-primary' : 'bg-zinc-900'} ${b && i === 3 ? 'animate-pulse' : ''}`} />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div className="space-y-10">
+                                <div className="space-y-6">
+                                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Dataset Saturation</p>
+                                    <div className="flex items-end gap-5">
+                                        <span className="text-6xl font-black text-white italic tracking-tighter leading-none">10.2K</span>
+                                        <span className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mb-2">+12% FLOW</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-6">
+                                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Core Confidence</p>
+                                    <div className="flex items-end gap-5">
+                                        <span className="text-6xl font-black text-white italic tracking-tighter leading-none">94.8<span className="text-primary text-3xl">%</span></span>
+                                        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2 text-glow">OPTIMAL</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white/[0.01] border border-white/5 rounded-[2.5rem] p-10 flex flex-col justify-between">
+                                <div className="space-y-4">
+                                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest italic">STATION_LOG_V8.4</p>
+                                    <p className="text-zinc-500 text-[11px] font-bold leading-relaxed uppercase tracking-widest italic">
+                                        "Biometric telemetry synchronization complete. Squad-wide trend analysis indicates potential overload in hamstring vectors for Mid-field units."
+                                    </p>
+                                </div>
+                                <button onClick={() => navigate('/models')} className="w-full py-4 text-[9px] font-black text-zinc-600 uppercase tracking-[0.5em] border border-white/5 bg-white/[0.02] rounded-2xl hover:bg-primary/5 hover:border-primary/20 hover:text-white transition-all">
+                                    OPEN NEURAL FORENSICS
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Tactical Analytics Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    {/* Squad Health Distribution */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        transition={{ delay: 0.4 }}
+                        className="lg:col-span-12 glass-card p-12 shadow-4xl relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
+                            <Activity size={200} className="text-primary" />
+                        </div>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-10 mb-16">
+                            <div className="space-y-3">
+                                <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic flex items-center gap-6">
+                                    <div className="h-10 w-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                                        <TrendingUp size={20} />
+                                    </div>
+                                    Squad Health <span className="text-primary italic">Distribution</span>
+                                </h3>
+                                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em] leading-none opacity-60">Fleet Performance Telemetry // Real-time Aggregate</p>
+                            </div>
+                            <div className="flex gap-10">
+                                <div className="text-right">
+                                    <p className="text-4xl font-black text-white italic tracking-tighter leading-none">{(stats.avg_risk_score || 0).toFixed(1)}%</p>
+                                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest mt-2">AVG RISK INDEX</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-4xl font-black text-primary italic tracking-tighter leading-none">{stats.high_risk_count}</p>
+                                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest mt-2">CRITICAL UNITS</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity Mini-Feed */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {stats.recent_predictions?.length > 0 ? (
+                                stats.recent_predictions.slice(0, 4).map((pred, i) => (
+                                    <motion.div 
+                                        key={i}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5 + i * 0.1 }}
+                                        className="p-8 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-primary/20 transition-all group pointer-events-none"
+                                    >
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className={`h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center border border-white/5 transition-colors ${pred.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>
+                                                <Activity size={18} />
+                                            </div>
+                                            <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">{new Date(pred.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        <h4 className="text-white font-black uppercase text-sm italic tracking-tighter leading-none mb-2 truncate">{pred.player_name || 'ANONYMOUS'}</h4>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{pred.predicted_type}</span>
+                                            <span className={`text-lg font-black italic ${pred.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>{(pred.risk_prob || 0).toFixed(0)}%</span>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div className="col-span-full py-12 flex flex-col items-center justify-center text-zinc-800 border-2 border-dashed border-zinc-900/50 rounded-3xl">
+                                    <Database size={40} className="mb-4 opacity-10" />
+                                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Awaiting Intelligence Intake</p>
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
                 </div>
 
@@ -127,8 +323,8 @@ const Dashboard = () => {
         );
     }
 
-    const chartData = Object.entries(data.prob_breakdown).map(([name, value]) => ({ name, value }));
-    const sortedFactors = data.key_factors;
+    const chartData = Object.entries(data?.prob_breakdown || {}).map(([name, value]) => ({ name, value }));
+    const sortedFactors = data?.key_factors || [];
 
     return (
         <div className="space-y-12 pb-20 font-['Outfit']">
@@ -147,13 +343,13 @@ const Dashboard = () => {
                             <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">Soma <span className="text-primary italic">Diagnostic</span></h1>
                             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                         </div>
-                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em] leading-none">{data.player_name || 'Individual Profile'} // {input.Position} // AG-{input.Age} // INTEL-V4</p>
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em] leading-none">{data.player_name || 'Individual Profile'} // {input?.Position || 'N/A'} // AG-{input?.Age || 'N/A'} // INTEL-V4</p>
                     </div>
                 </div>
                 <div className="flex gap-4 flex-wrap">
                     <button
                         onClick={() => {
-                            const topInjury = Object.entries(data.prob_breakdown)
+                            const topInjury = Object.entries(data?.prob_breakdown || {})
                                 .sort(([, a], [, b]) => b - a)[0]?.[0] || 'general';
                             navigate('/diet', { state: { injury_type: topInjury } });
                         }}
@@ -163,7 +359,7 @@ const Dashboard = () => {
                     </button>
                     <button
                         onClick={() => {
-                            const topInjury = Object.entries(data.prob_breakdown)
+                            const topInjury = Object.entries(data?.prob_breakdown || {})
                                 .sort(([, a], [, b]) => b - a)[0]?.[0] || 'general';
                             navigate('/workout', { state: { injury_type: topInjury } });
                         }}
@@ -177,6 +373,14 @@ const Dashboard = () => {
                     >
                         <RefreshCw size={18} /> Re-Diagnose
                     </button>
+                    {(user?.role === 'coach' || user?.role === 'admin') && (
+                        <button
+                            onClick={() => navigate('/dashboard', { state: null })}
+                            className="bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white border border-white/5 py-4 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3"
+                        >
+                            <LayoutDashboard size={16} /> Return to Fleet Hub
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -190,10 +394,10 @@ const Dashboard = () => {
                     className="lg:col-span-4 glass-card p-12 flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-3xl"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                    <RiskGauge value={data.risk_prob} size={280} color="#FF5F01" />
+                    <RiskGauge value={data?.risk_prob || 0} size={280} color="#FF5F01" />
                     <div className="mt-12 space-y-3">
-                        <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${data.risk_label === 'High' ? 'text-red-500' : 'text-primary primary-glow'}`}>
-                            {data.risk_label} RISK LEVEL
+                        <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${data?.risk_label === 'High' ? 'text-red-500' : 'text-primary primary-glow'}`}>
+                            {data?.risk_label || 'DATA'} RISK LEVEL
                         </h3>
                         <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em]">STATION_CONFIDENCE: 94.2%</p>
                     </div>
@@ -209,13 +413,13 @@ const Dashboard = () => {
                     <div className="absolute inset-0 bg-radial-at-c from-primary/5 to-transparent pointer-events-none" />
                     <div className="absolute top-12 left-12 z-10 pointer-events-none">
                         <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-3 italic">Anatomical <span className="text-primary italic">Mapping</span></h3>
-                        <div className={`p-2 px-5 rounded-2xl text-[10px] font-black uppercase inline-flex items-center gap-4 border ${data.predicted_type !== 'None' ? 'bg-red-500/10 border-red-500/30 text-red-500' : 'bg-primary/10 border-primary/30 text-primary'}`}>
-                            <div className={`h-2 w-2 rounded-full animate-pulse ${data.predicted_type !== 'None' ? 'bg-red-500 shadow-[0_0_12px_#ef4444]' : 'bg-primary shadow-[0_0_12px_#FF5F01]'}`} />
-                            {data.predicted_type !== 'None' ? `CRITICAL ZONE: ${data.predicted_type}` : 'NO ANOMALIES DETECTED'}
+                        <div className={`p-2 px-5 rounded-2xl text-[10px] font-black uppercase inline-flex items-center gap-4 border ${data?.predicted_type && data.predicted_type !== 'None' ? 'bg-red-500/10 border-red-500/30 text-red-500' : 'bg-primary/10 border-primary/30 text-primary'}`}>
+                            <div className={`h-2 w-2 rounded-full animate-pulse ${data?.predicted_type && data.predicted_type !== 'None' ? 'bg-red-500 shadow-[0_0_12px_#ef4444]' : 'bg-primary shadow-[0_0_12px_#FF5F01]'}`} />
+                            {data?.predicted_type && data.predicted_type !== 'None' ? `CRITICAL ZONE: ${data.predicted_type}` : 'NO ANOMALIES DETECTED'}
                         </div>
                     </div>
 
-                    <Model3D highlightedPart={data.predicted_type} className="w-full h-full scale-110 transition-all duration-1000" />
+                    <Model3D highlightedPart={data?.predicted_type || 'None'} className="w-full h-full scale-110 transition-all duration-1000" />
 
                     <div className="absolute bottom-12 right-12 text-right font-mono text-[9px] text-zinc-700 font-bold tracking-[0.4em] uppercase opacity-60">
                         ANALYTICS: RF_V4_PRO
@@ -325,7 +529,7 @@ const Dashboard = () => {
                                 <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em]">AI-Generated Recovery Framework</p>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {data.recommendations.map((rec, i) => (
+                                { (data?.recommendations || []).map((rec, i) => (
                                     <div key={i} className="flex items-center gap-5 p-6 bg-black/40 rounded-3xl border border-white/5 hover:border-primary/20 transition-all">
                                         <div className="h-8 w-8 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
                                             <ShieldCheck className="text-primary" size={18} />

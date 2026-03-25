@@ -101,8 +101,8 @@ const PlayerDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 <MetricCard
                     label="Current Risk Index"
-                    value={latest ? `${latest.risk_prob.toFixed(2)}%` : '0.00%'}
-                    subLabel={latest ? latest.risk_label : 'NOT SCANNED'}
+                    value={latest?.risk_prob !== undefined ? `${latest.risk_prob.toFixed(2)}%` : '0.00%'}
+                    subLabel={latest?.risk_label || 'NOT SCANNED'}
                     icon={Activity}
                     color={latest?.risk_prob > 50 ? '#ef4444' : '#FF5F01'}
                 />
@@ -159,12 +159,15 @@ const PlayerDashboard = () => {
                                 className="grid grid-cols-1 lg:grid-cols-12 gap-10"
                             >
                                 {/* Trend Chart */}
-                                <div className="lg:col-span-8 glass-card p-12 shadow-3xl">
-                                    <h3 className="text-xl font-black text-white uppercase mb-12 flex items-center gap-4 italic">
+                                <div className="lg:col-span-8 glass-card p-12 shadow-3xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-8 opacity-[0.01] text-primary">
+                                        <TrendingUp size={200} />
+                                    </div>
+                                    <h3 className="text-xl font-black text-white uppercase mb-12 flex items-center gap-4 italic z-10 relative">
                                         <TrendingUp className="text-primary" size={24} />
                                         Risk Propensity Timeline
                                     </h3>
-                                    <div className="h-[350px] w-full">
+                                    <div className="h-[350px] w-full z-10 relative">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <AreaChart data={riskTrend}>
                                                 <defs>
@@ -182,7 +185,7 @@ const PlayerDashboard = () => {
                                                 />
                                                 <YAxis hide domain={[0, 100]} />
                                                 <Tooltip
-                                                    contentStyle={{ background: '#0a0a0a', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', color: '#fff' }}
+                                                    contentStyle={{ background: '#0a0a0a', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', color: '#fff', fontWeight: 'bold' }}
                                                 />
                                                 <Area
                                                     type="monotone"
@@ -197,48 +200,39 @@ const PlayerDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* Recent Scan Quick Look */}
+                                {/* Detailed Scan Quick Look */}
                                 <div className="lg:col-span-4 space-y-10">
-                                    <div className="glass-card p-10 shadow-3xl relative overflow-hidden group">
-                                        <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-8">Latest Stress Mapping</h3>
+                                    <div className="glass-card p-10 shadow-3xl relative overflow-hidden group flex flex-col items-center justify-center min-h-[450px]">
+                                        <div className="absolute top-8 left-10 opacity-30">
+                                            <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em] italic leading-none">Scanning...</p>
+                                        </div>
+                                        
+                                        <RiskGauge value={latest?.risk_prob || 0} size={280} />
+                                        
                                         {latest ? (
-                                            <div className="space-y-8">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
-                                                        <Shield size={28} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-2xl font-black text-white uppercase italic tracking-tighter">{latest.predicted_type}</p>
-                                                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest leading-none mt-1">PRIMARY BIOMETRIC ANOMALY</p>
-                                                    </div>
+                                            <div className="mt-12 w-full space-y-6">
+                                                <div className="flex items-center justify-center gap-4 py-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                                    <Shield size={18} className="text-primary" />
+                                                    <span className="text-xs font-black text-white uppercase italic tracking-tighter">{latest.predicted_type} DETECTED</span>
                                                 </div>
-                                                <div className="space-y-3 pt-5 border-t border-white/5">
-                                                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-[0.3em]">RECOVERY PROTOCOLS ACTIVE</p>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {latest.recommendations.slice(0, 2).map((r, i) => (
-                                                            <span key={i} className="text-[9px] font-bold text-zinc-400 bg-white/[0.03] px-3 py-1.5 rounded-xl border border-white/5">
-                                                                {r.substring(0, 30)}...
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                                <p className="text-[9px] font-bold text-zinc-600 text-center uppercase tracking-widest leading-relaxed">Neural model recommends immediate protocol engagement to mitigate high-delta variance.</p>
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                            <div className="flex flex-col items-center justify-center py-12 text-center opacity-40 grayscale">
                                                 <Target className="text-zinc-800 mb-5" size={40} />
-                                                <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">NO SCAN DATA AVAILABLE</p>
+                                                <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">AWAITING INITIAL SCAN</p>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="glass-card p-10 bg-primary shadow-3xl relative overflow-hidden group cursor-pointer" onClick={() => navigate('/workout')}>
-                                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform text-white">
-                                            <Zap size={100} />
+                                    <div className="glass-card p-10 bg-primary shadow-4xl shadow-primary/10 relative overflow-hidden group cursor-pointer" onClick={() => navigate('/workout')}>
+                                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform text-white">
+                                            <Dumbbell size={120} />
                                         </div>
-                                        <h3 className="text-[10px] font-black text-black/40 uppercase tracking-[0.3em] mb-3">Next Session</h3>
-                                        <h2 className="text-3xl font-black text-black uppercase tracking-tighter italic leading-none">Power & Core</h2>
-                                        <p className="text-[10px] font-black text-black/60 uppercase tracking-widest mt-8 flex items-center gap-3">
-                                            GO TO WORKOUT <ArrowRight size={14} />
+                                        <h3 className="text-[10px] font-black text-black/40 uppercase tracking-[0.4em] mb-4">Neural Override</h3>
+                                        <h2 className="text-4xl font-black text-black uppercase tracking-tighter italic leading-none">Execute <br/>Protocol</h2>
+                                        <p className="text-[9px] font-black text-black/60 uppercase tracking-widest mt-12 flex items-center gap-3">
+                                            SYNC SHIELD KINETICS <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
                                         </p>
                                     </div>
                                 </div>
@@ -266,7 +260,7 @@ const PlayerDashboard = () => {
                                         </div>
                                         <div className="flex items-center gap-12">
                                             <div className="text-right">
-                                                <p className={`text-3xl font-black italic tracking-tighter leading-none ${a.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>{a.risk_prob.toFixed(2)}%</p>
+                                                <p className={`text-3xl font-black italic tracking-tighter leading-none ${a.risk_prob > 50 ? 'text-red-500' : 'text-primary'}`}>{(a.risk_prob || 0).toFixed(2)}%</p>
                                                 <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest mt-1">RISK INDEX</p>
                                             </div>
                                             <button

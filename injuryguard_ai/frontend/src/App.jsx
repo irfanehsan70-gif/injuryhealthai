@@ -12,6 +12,7 @@ import TeamOverview from './pages/TeamOverview';
 import ModelInsights from './pages/ModelInsights';
 import DietPlan from './pages/DietPlan';
 import WorkoutPlan from './pages/WorkoutPlan';
+import VerificationPage from './pages/VerificationPage';
 import Sidebar from './components/Sidebar';
 
 // Error boundary component
@@ -90,13 +91,19 @@ const AppLayout = () => {
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <ErrorBoundary>
           <Routes location={location}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Role-Protected Channels */}
+            <Route path="/dashboard" element={!isPlayer ? <Dashboard /> : <Navigate to="/player" replace />} />
             <Route path="/player" element={<PlayerDashboard />} />
-            <Route path="/assessment" element={<AssessmentForm />} />
-            <Route path="/team" element={<TeamOverview />} />
+            <Route path="/assessment" element={!isPlayer ? <AssessmentForm /> : <Navigate to="/player" replace />} />
+            <Route path="/team" element={!isPlayer ? <TeamOverview /> : <Navigate to="/player" replace />} />
+            <Route path="/verify" element={user?.role === 'admin' ? <VerificationPage /> : <Navigate to="/dashboard" replace />} />
+            
+            {/* Common Channels */}
             <Route path="/models" element={<ModelInsights />} />
             <Route path="/diet" element={<DietPlan />} />
             <Route path="/workout" element={<WorkoutPlan />} />
+
+            {/* Tactical Steering */}
             <Route path="/" element={<Navigate to={isPlayer ? '/player' : '/dashboard'} replace />} />
             <Route path="*" element={<Navigate to={isPlayer ? '/player' : '/dashboard'} replace />} />
           </Routes>

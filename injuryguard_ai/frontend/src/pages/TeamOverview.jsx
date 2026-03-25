@@ -81,8 +81,8 @@ const TeamOverview = () => {
     };
 
     const filteredPlayers = registeredPlayers.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.email.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (p.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
 
     const pieData = results ? [
@@ -190,7 +190,7 @@ const TeamOverview = () => {
                                 </div>
                                 <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Fleet Mean Stress</h4>
                                 <div className="flex items-end gap-5">
-                                    <h2 className="text-6xl font-black text-primary italic tracking-tighter">{results.avg_risk.toFixed(2)}%</h2>
+                                    <h2 className="text-6xl font-black text-primary italic tracking-tighter">{results?.avg_risk?.toFixed(2) || 0}%</h2>
                                     <TrendingUp className="text-primary/40 mb-3" size={32} />
                                 </div>
                                 <div className="mt-8 flex items-center gap-3">
@@ -205,7 +205,7 @@ const TeamOverview = () => {
                                 </div>
                                 <h4 className="text-[10px] font-black text-zinc-600 uppercase mb-5 tracking-[0.4em]">Critical Anomaly Units</h4>
                                 <div className="flex items-end gap-5">
-                                    <h2 className="text-6xl font-black text-red-500 italic tracking-tighter">{results.risk_distribution.High}</h2>
+                                    <h2 className="text-6xl font-black text-red-500 italic tracking-tighter">{results?.risk_distribution?.High || 0}</h2>
                                     <ShieldAlert className="text-red-500/40 mb-3 animate-pulse" size={32} />
                                 </div>
                                 <div className="mt-8">
@@ -260,7 +260,7 @@ const TeamOverview = () => {
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                         <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">SQUAD TOTAL</p>
-                                        <p className="text-4xl font-black text-white italic">{results.total_players}</p>
+                                        <p className="text-4xl font-black text-white italic">{results?.total_players || 0}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-8">
@@ -272,7 +272,7 @@ const TeamOverview = () => {
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-2xl font-black text-zinc-400 italic">{d.value}</span>
-                                                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1">PERCENTILE: {Math.round((d.value / results.total_players) * 100)}%</p>
+                                                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1">PERCENTILE: {Math.round((d.value / (results?.total_players || 1)) * 100)}%</p>
                                             </div>
                                         </div>
                                     ))}
@@ -293,7 +293,7 @@ const TeamOverview = () => {
                                 High Variance Personnel
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {results.top_risk_players.map((p, i) => (
+                                { (results?.top_risk_players || []).map((p, i) => (
                                     <div key={i} className="glass-card p-10 relative overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-3xl">
                                         <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform text-red-500">
                                             <ShieldAlert size={60} />

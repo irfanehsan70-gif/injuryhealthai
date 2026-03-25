@@ -1,0 +1,16 @@
+OK: Messi
+OK: Suarez
+OK: Ter stegen
+OK: Irfan
+OK: Retrain Test
+FAIL user: alba -> Object of type bytes is not JSON serializable
+  _id: ObjectId = ObjectId('69afd76b85b5b8cdea689c4b')
+  name: str = 'alba'
+  email: str = 'alba@gmail.com'
+  password: bytes = b'$2b$12$QkclQQKkC.QAI1esZhhm1.0TOJO00ei1.NvWtlF/WKQr4bo4T1Zuy'
+  role: str = 'player'
+  team_name: str = 'BARCELONA'
+  created_at: datetime = datetime.datetime(2026, 3, 10, 8, 33, 47, 344000)
+  profile: dict = {'league': 'La Liga', 'position': 'Midfielder', 'age': 25, 'seasons_played': 13, 'matches_per_season
+
+Total OK: 5

@@ -1,8 +1,33 @@
-# React + Vite
+# 📟 InjuryGuard AI | Tactical Interface
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the high-performance frontend for the **InjuryGuard AI** platform. It provides the visual layer for diagnostic telemetry, player profiling, and squad management.
 
-Currently, two official plugins are available:
+## 🛠 Tech Stack
+- **React 18** (Vite)
+- **Framer Motion** (Neural-style animations)
+- **Tailwind CSS** (Industrial design system)
+- **Lucide React** (High-fidelity iconography)
+- **Recharts** (Performance trend visualizations)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🏗 Key Components
+- `PlayerDashboard`: Personal risk assessments and trend analysis.
+- `CoachDashboard`: Roster management and batch CSV analysis.
+- `LandingPage`: High-tech "Gate Access" authentication portal.
+- `AssessmentFlow`: Diagnostic input wizard with real-time feedback.
+
+## 🚀 Development
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## 🎨 Design Principles
+- **Clarity under Pressure**: High-contrast typography for immediate diagnostic reading.
+- **Dynamic Feedback**: Hover states and micro-animations to confirm intent.
+- **Elite Aesthetic**: A dark, premium palette modeled after high-end medical and military interfaces.

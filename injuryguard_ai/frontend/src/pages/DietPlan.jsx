@@ -119,33 +119,55 @@ const DietPlan = () => {
                             <p className="text-zinc-600 text-lg font-bold italic leading-relaxed max-w-xl opacity-80">{plan.subtitle}</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
+                        <div className="grid grid-cols-1 gap-16 relative z-10">
                             {plan.sections.map((section, idx) => {
                                 const c = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
                                 return (
-                                    <div key={idx} className="space-y-6">
-                                        <h3 className={`${c.title} font-black uppercase text-[10px] tracking-[0.4em] flex items-center gap-4 italic`}>
-                                            <div className={`h-2 w-2 rounded-full ${c.dot} shadow-[0_0_8px_currentColor]`} />
-                                            {section.category}
-                                        </h3>
+                                    <div key={idx} className="space-y-8">
+                                        <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                                            <h3 className={`${c.title} font-black uppercase text-sm lg:text-base tracking-[0.5em] flex items-center gap-6 italic`}>
+                                                <div className={`h-3 w-3 rounded-full ${c.dot} shadow-[0_0_12px_currentColor]`} />
+                                                {section.category}
+                                            </h3>
+                                            <div className="px-4 py-1 bg-white/[0.02] rounded-full border border-white/5">
+                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Phase Control</span>
+                                            </div>
+                                        </div>
 
-                                        <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                             {section.items.map((item, i) => {
                                                 const imgKey = `${idx}-${i}`;
                                                 return (
-                                                    <div key={i} className={`flex items-center justify-between p-4 bg-white/[0.02] rounded-3xl border ${c.border} hover:bg-white/[0.04] transition-all group cursor-default`}>
-                                                        <div className="flex items-center gap-5">
-                                                            <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-white/5 bg-zinc-900 flex items-center justify-center text-2xl group-hover:scale-110 transition-all duration-500">
-                                                                {!imgErrors[imgKey] ? (
-                                                                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" onError={() => handleImgError(imgKey)} />
-                                                                ) : (
-                                                                    <span>{FOOD_EMOJI[item.name] || '🍽️'}</span>
-                                                                )}
-                                                            </div>
-                                                            <span className="text-zinc-400 font-black text-xs uppercase tracking-tight group-hover:text-white transition-colors italic">{item.name}</span>
+                                                    <div key={i} className={`flex flex-col gap-6 p-8 bg-zinc-900/40 backdrop-blur-md rounded-[2.5rem] border ${c.border} hover:border-primary/30 transition-all duration-700 group cursor-default shadow-2xl relative overflow-hidden`}>
+                                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 blur-[50px] rounded-full group-hover:bg-primary/10 transition-colors" />
+                                                        
+                                                        <div className="h-56 w-full rounded-[2rem] overflow-hidden border border-white/10 bg-zinc-950 flex items-center justify-center text-6xl group-hover:scale-[1.05] transition-all duration-1000 shadow-2xl relative">
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            {!imgErrors[imgKey] ? (
+                                                                <img 
+                                                                    src={item.image} 
+                                                                    alt={item.name} 
+                                                                    className="h-full w-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-700" 
+                                                                    onError={() => handleImgError(imgKey)} 
+                                                                />
+                                                            ) : (
+                                                                <span className="drop-shadow-2xl">{FOOD_EMOJI[item.name] || '🍽️'}</span>
+                                                            )}
                                                         </div>
-                                                        <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-800 transition-colors">
-                                                            <Zap size={14} />
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.4em] italic leading-none">Molecular Target</p>
+                                                            </div>
+                                                            <h4 className="text-white font-black text-2xl lg:text-3xl uppercase tracking-tighter group-hover:text-primary transition-colors italic leading-[0.9]">{item.name}</h4>
+                                                        </div>
+                                                        
+                                                        <div className="pt-4 mt-auto">
+                                                            <div className="h-px w-full bg-gradient-to-r from-white/5 to-transparent mb-4" />
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest italic">Bio-Availability: High</span>
+                                                                <Zap size={14} className="text-primary opacity-40" />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 );

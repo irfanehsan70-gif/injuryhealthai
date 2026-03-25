@@ -1,7 +1,23 @@
 from pymongo import MongoClient
-MONGO_URI = "mongodb+srv://Irfan:Fanu916%40@cluster0.osljpls.mongodb.net/injuryguard_ai?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(MONGO_URI)
-db = client['injuryguard_ai']
-users = db.users.find({}).sort('created_at', -1)
-for u in users:
-    print(f"{u.get('email')} | {u.get('created_at')} | {u.get('role')}")
+import urllib.parse
+import certifi
+
+ca = certifi.where()
+USER = "Irfan"
+PWD = "Fanu916@"
+MONGO_URI = f"mongodb+srv://{USER}:{urllib.parse.quote_plus(PWD)}@cluster0.osljpls.mongodb.net/?appName=Cluster0"
+DB_NAME = "injuryguard_ai"
+
+try:
+    client = MongoClient(MONGO_URI, 
+                         serverSelectionTimeoutMS=10000, 
+                         tlsCAFile=ca, 
+                         tlsAllowInvalidCertificates=True)
+    db = client[DB_NAME]
+    
+    users = list(db.users.find())
+    for u in users:
+        print(f"Name: {u.get('name')}, Email: {u.get('email')}, Role: {u.get('role')}, Team: {u.get('team_name')}")
+        
+except Exception as e:
+    print(f"Error: {e}")

@@ -107,15 +107,13 @@ const AssessmentForm = () => {
         e.preventDefault();
         setLoading(true);
 
-        // Artificial delay for premium feels
-        await new Promise(r => setTimeout(r, 2500));
-
         try {
             const response = await api.post('/predict', formData);
             navigate('/dashboard', { state: { prediction: response.data, input: formData } });
         } catch (err) {
             console.error(err);
             setLoading(false);
+            alert("Neural Core Error: " + (err.response?.data?.message || err.message || "Unknown error during diagnosis. Check connection."));
         }
     };
 

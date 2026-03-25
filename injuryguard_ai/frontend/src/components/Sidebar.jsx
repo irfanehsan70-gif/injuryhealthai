@@ -8,6 +8,7 @@ import {
     ChevronRight,
     Activity,
     ShieldAlert,
+    ShieldCheck,
     User,
     Apple,
     Dumbbell,
@@ -24,7 +25,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
     const playerLinks = [
         { name: 'Profile', icon: User, path: '/player' },
-        { name: 'Assessment', icon: ClipboardList, path: '/assessment' },
         { name: 'Nutrition', icon: Apple, path: '/diet' },
         { name: 'Training', icon: Dumbbell, path: '/workout' },
         { name: 'Intelligence', icon: ShieldAlert, path: '/models' },
@@ -33,10 +33,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const coachLinks = [
         { name: 'Intelligence', icon: LayoutDashboard, path: '/dashboard' },
         { name: 'Squad List', icon: Users, path: '/team' },
+        { name: 'Verification', icon: ShieldCheck, path: '/verify', adminOnly: true },
         { name: 'ML Insights', icon: ShieldAlert, path: '/models' },
     ];
 
     const links = isPlayer ? playerLinks : coachLinks;
+    const filteredLinks = links.filter(link => !link.adminOnly || user?.role === 'admin');
 
     const handleLogout = () => {
         logout();
@@ -68,7 +70,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             {/* Navigation Section */}
             <div className="flex-1 px-6 mt-16">
                 <div className="space-y-4">
-                    {links.map((link) => (
+                    {filteredLinks.map((link) => (
                         <NavLink
                             key={link.name}
                             to={link.path}

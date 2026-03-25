@@ -1,0 +1,10 @@
+Latest assessment raw doc:
+  OK  _id: type=ObjectId
+  OK  user: type=str
+  OK  player_name: type=str
+  OK  team_name: type=str
+  OK  input: type=dict
+  OK  result: type=dict
+  OK  timestamp: type=datetime
+
+JSON OK: 1073 bytes
