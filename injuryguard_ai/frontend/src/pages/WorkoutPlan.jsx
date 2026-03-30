@@ -355,10 +355,6 @@ const ExerciseCard = ({ ex, delay }) => {
                         </div>
                     </div>
 
-                    <div className="p-10 bg-primary/5 rounded-[2.5rem] border border-primary/10 border-dashed space-y-6">
-                        <p className="text-[9px] font-black text-primary uppercase tracking-[0.4em] text-center italic">Biometric Feedback Required</p>
-                        <button className="w-full py-5 bg-white shadow-3xl shadow-primary/20 rounded-2xl text-black font-black uppercase text-xs tracking-[0.3em] italic hover:bg-primary transition-all active:scale-95">LOG COMPLETION STATUS</button>
-                    </div>
                 </div>
             </div>
         </motion.div>

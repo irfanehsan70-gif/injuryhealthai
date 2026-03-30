@@ -14,6 +14,7 @@ import json
 import random
 import urllib.parse
 import certifi
+import shap
 
 app = Flask(__name__)
 # Enhanced CORS to prevent preflight blocks during dev environment restarts
@@ -87,6 +88,7 @@ binary_model = None
 type_model = None
 encoders = None
 metrics = None
+explainer = None
 
 try:
     with open(BINARY_MODEL_PATH, 'rb') as f:
@@ -97,6 +99,14 @@ try:
         encoders = pickle.load(f)
     with open(METRICS_PATH, 'rb') as f:
         metrics = pickle.load(f)
+        
+    try:
+        base_estimator = binary_model.calibrated_classifiers_[0].estimator
+        explainer = shap.TreeExplainer(base_estimator)
+        print("SHAP explainer loaded.")
+    except Exception as e:
+        print(f"Error loading SHAP explainer: {e}")
+        
     print("ML models loaded.")
 except Exception as e:
     print(f"Error loading models: {e}")
@@ -133,6 +143,19 @@ def serialize_doc(doc):
         return doc.isoformat()
     else:
         return doc
+
+def dampen_probability(p, prev_inj=0, recur=0, fatigue=0.0):
+    is_severe = (prev_inj >= 2) and (recur == 1) and (fatigue >= 0.8)
+    if p < 0.6:
+        return p
+    
+    if not is_severe:
+        # Strictly cap at 90%. Compress [0.6, 1.0] -> [0.6, 0.90]
+        return min(0.90, 0.6 + (p - 0.6) * (0.30 / 0.40))
+    else:
+        # Severe case: can go up to 99%
+        # Compress [0.6, 1.0] -> [0.6, 0.99]
+        return min(0.99, 0.6 + (p - 0.6) * (0.39 / 0.40))
 
 def standardize_input(data):
     mapping = {
@@ -336,6 +359,37 @@ def verify_player():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/admin/delete_player', methods=['POST'])
+@token_required
+@roles_accepted('admin')
+def delete_player():
+    try:
+        data = request.json
+        player_email = data.get('email')
+        player_name = data.get('name')
+        
+        u_col, pre_col, t_col, p_col = get_db_collections()
+        
+        if player_email:
+            u_col.delete_one({"email": player_email})
+            
+        if player_name:
+            import re
+            safe_name = re.escape(str(player_name).strip())
+            name_query = {"$regex": f"^{safe_name}$", "$options": "i"}
+            
+            if p_col is not None:
+                p_col.delete_many({"name": name_query})
+            if pre_col is not None:
+                pre_col.delete_many({"player_name": name_query})
+            
+            # Stranded CSV user sweep
+            u_col.delete_many({"name": name_query, "email": {"$exists": False}})
+            
+        return jsonify({'message': 'Player deleted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/model_stats', methods=['GET'])
 @token_required
 def get_model_stats():
@@ -392,7 +446,12 @@ def predict():
                 return float(default)
 
         # Raw Features
-        age = safe_float('Age', 25)
+        raw_age = safe_float('Age', 25)
+        # Goalkeepers are less affected by age; scale effective age
+        if position_str in ['Goalkeeper', 'GK'] and raw_age > 26:
+            age = 26 + (raw_age - 26) * 0.2
+        else:
+            age = raw_age
         seasons = safe_float('Seasons_Played', 5)
         matches = safe_float('Matches_Per_Season', 30)
         minutes = safe_float('Minutes_Per_Season', 2000)
@@ -422,6 +481,7 @@ def predict():
         
         # Stage 1: Binary Risk
         prob = float(binary_model.predict_proba(row)[0][1])
+        prob = dampen_probability(prob, prev_inj, recur, fatigue)
         prob = np.clip(prob + (random.random()-0.5)*0.02, 0.01, 0.99)
         risk_pct = round(prob * 100, 2)
         
@@ -431,6 +491,35 @@ def predict():
             type_idx = type_model.predict(row)[0]
             pred_type = str(le_type.inverse_transform([type_idx])[0])
         
+        key_factors = []
+        if explainer is not None:
+            try:
+                feature_names = [
+                    'League', 'Position', 'Age', 'Seasons Played', 'Matches/Season', 'Minutes/Season', 'High Speed Runs', 'Previous Injuries', 'Recurrence Flag', 'Fatigue Index', 
+                    'Load Ratio', 'Sprint Load', 'Injury Rate', 'Age/Fatigue', 'High Risk Combo', 'Age/Load', 'Fatigue/Recurrence', 'HSR Impact'
+                ]
+                shap_vals = explainer.shap_values(row)[0]
+                if len(np.array(shap_vals).shape) > 1:
+                    shap_vals = shap_vals[1] if shap_vals.shape[1] > 1 else shap_vals[:, 0]
+                
+                abs_shap = np.abs(shap_vals)
+                top_indices = np.argsort(abs_shap)[::-1][:3]
+                
+                for i in top_indices:
+                    if abs_shap[i] > 0:
+                        # Scale magnitude for UI display (0-100)
+                        impact = round(float(abs_shap[i] * 40), 1)
+                        key_factors.append({'name': feature_names[i], 'impact': min(impact, 100.0)})
+            except Exception as e:
+                print(f"SHAP error: {e}")
+        
+        if len(key_factors) == 0:
+            key_factors = [
+                {'name': 'Fatigue Level', 'impact': round(fatigue * 25, 1)},
+                {'name': 'Workload Ratio', 'impact': round(load_ratio / 2, 1)},
+                {'name': 'Previous Data', 'impact': round(prev_inj * 15, 1)}
+            ]
+
         res = {
             'player_name': standard_data.get('PlayerName', 'Athlete'),
             'risk_prob': risk_pct,
@@ -438,11 +527,7 @@ def predict():
             'predicted_type': pred_type,
             'timestamp': datetime.datetime.utcnow().isoformat(),
             'prob_breakdown': {t: round(random.uniform(5, 15), 1) for t in le_type.classes_}, # Placeholder for UI
-            'key_factors': [
-                {'name': 'Fatigue Level', 'impact': round(fatigue * 25, 1)},
-                {'name': 'Workload Ratio', 'impact': round(load_ratio / 2, 1)},
-                {'name': 'Previous Data', 'impact': round(prev_inj * 15, 1)}
-            ],
+            'key_factors': key_factors,
             'recommendations': [
                 "Reduce high-intensity volume by 20%",
                 "Implement focused mobility drills for " + pred_type if pred_type != "None" else "Lower body stability training",
@@ -523,20 +608,37 @@ def upload_team():
         
         matches = df['Matches_Per_Season'].clip(lower=1)
         seasons = df['Seasons_Played'].clip(lower=1)
+        minutes = df['Minutes_Per_Season']
+        hsr = df['High_Speed_Runs']
+        fatigue = df['Fatigue_Index']
+        recur = df['Recurrence_Flag']
+        prev_inj = df['Previous_Injuries']
+        
+        # Goalkeepers are less affected by age; scale effective age
+        effective_age = df['Age'].copy()
+        gk_mask = df['Position'].isin(['Goalkeeper', 'GK']) & (effective_age > 26)
+        effective_age[gk_mask] = 26 + (effective_age[gk_mask] - 26) * 0.2
+        
+        pos_weight = df['Position'].map({'Forward': 1.2, 'Midfielder': 1.0, 'Defender': 0.8, 'Goalkeeper': 0.2, 'GK': 0.2}).fillna(1.0)
         
         X = np.column_stack([
-            l_enc, p_enc, df['Age'], df['Seasons_Played'], df['Matches_Per_Season'],
-            df['Minutes_Per_Season'], df['High_Speed_Runs'], df['Previous_Injuries'],
-            df['Recurrence_Flag'], df['Fatigue_Index'],
-            (df['Minutes_Per_Season'] / matches),
-            (df['High_Speed_Runs'] * df['Fatigue_Index']),
-            (df['Previous_Injuries'] / seasons),
-            (df['Age'] * df['Fatigue_Index']),
-            (df['Recurrence_Flag'] * df['Previous_Injuries'] * df['Fatigue_Index'])
+            l_enc, p_enc, effective_age, df['Seasons_Played'], df['Matches_Per_Season'],
+            minutes, hsr, prev_inj, recur, fatigue,
+            (minutes / matches),                                # load_ratio
+            (hsr * fatigue),                                    # sprint_load
+            (prev_inj / seasons),                               # injury_rate
+            (effective_age * fatigue),                          # age_fatigue
+            (recur * prev_inj * fatigue),                       # high_risk_combo
+            (effective_age / 35.0) * (minutes / 4000.0),        # age_load
+            (fatigue * recur),                                  # fatigue_recurrence
+            (hsr * pos_weight)                                  # hsr_impact
         ])
         
         # Predict
-        probs = binary_model.predict_proba(X)[:, 1]
+        raw_probs = binary_model.predict_proba(X)[:, 1]
+        probs = np.zeros_like(raw_probs)
+        for i in range(len(raw_probs)):
+            probs[i] = dampen_probability(raw_probs[i], prev_inj.iloc[i], recur.iloc[i], fatigue.iloc[i])
         type_encs = type_model.predict(X)
         types = le_type.inverse_transform(type_encs)
         
